@@ -1,0 +1,52 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="abudai" id="RUSSIAN_WORD_SEQUENCE">
+        <createSequence incrementBy="1"
+                        sequenceName="russian_word_sequence"
+                        startValue="1"/>
+    </changeSet>
+
+    <changeSet author="abudai" id="russian-word-table">
+        <createTable tableName="russian_word">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="russian_word_pkey"/>
+            </column>
+
+            <column name="word" type="NVARCHAR(2000)"/>
+            <column name="code" type="NVARCHAR(2000)"/>
+            <column name="code_parent" type="NVARCHAR(2000)"/>
+            <column name="gender" type="NVARCHAR(255)"/>
+            <column name="wcase" type="NVARCHAR(255)"/>
+            <column name="soul" type="NVARCHAR(255)"/>
+        </createTable>
+        <!--        <createTable tableName="russian_word">-->
+        <!--            <column name="id" type="BIGINT">-->
+        <!--                <constraints nullable="false" primaryKey="true" primaryKeyName="russian_word_pkey"/>-->
+        <!--            </column>-->
+
+        <!--            <column name="word" type="NVARCHAR(2000)"/>-->
+        <!--            <column name="code" type="NVARCHAR(2000)"/>-->
+        <!--            <column name="code_parent" type="NVARCHAR(2000)"/>-->
+        <!--            <column name="type" type="NVARCHAR(255)"/>-->
+        <!--            <column name="type_sub" type="NVARCHAR(255)"/>-->
+        <!--            <column name="type_ssub" type="NVARCHAR(255)"/>-->
+        <!--            <column name="plural" type="NVARCHAR(255)"/>-->
+        <!--            <column name="gender" type="NVARCHAR(255)"/>-->
+        <!--            <column name="wcase" type="NVARCHAR(255)"/>-->
+        <!--            <column name="comp" type="NVARCHAR(255)"/>-->
+        <!--            <column name="soul" type="NVARCHAR(255)"/>-->
+        <!--            <column name="transit" type="NVARCHAR(255)"/>-->
+        <!--            <column name="perfect" type="NVARCHAR(255)"/>-->
+        <!--            <column name="face" type="NVARCHAR(255)"/>-->
+        <!--            <column name="kind" type="NVARCHAR(255)"/>-->
+        <!--            <column name="time" type="NVARCHAR(255)"/>-->
+        <!--            <column name="inf" type="NVARCHAR(255)"/>-->
+        <!--            <column name="vozv" type="NVARCHAR(255)"/>-->
+        <!--            <column name="nakl" type="NVARCHAR(255)"/>-->
+        <!--            <column name="short" type="NVARCHAR(255)"/>-->
+        <!--        </createTable>-->
+    </changeSet>
+</databaseChangeLog>

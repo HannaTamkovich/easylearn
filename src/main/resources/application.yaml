@@ -1,0 +1,33 @@
+server:
+  servlet:
+    context-path: /api
+    session:
+      timeout: 20m
+  port: ${PORT:8080}
+
+spring:
+  profiles:
+    active: local
+  liquibase:
+    change-log: classpath:/db/db.changelog-master.xml
+  datasource:
+    url: jdbc:h2:mem:easylearndb;INIT=CREATE SCHEMA IF NOT EXISTS EASY_LEARN;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    hikari:
+      schema: EASY_LEARN
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: validate
+  cache:
+    type: simple
+
+logging:
+  level:
+    com.severstal: debug
+    org.hibernate.SQL: debug

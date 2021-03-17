@@ -1,0 +1,46 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="abudai" id="WORD_TO_USER_SEQUENCE">
+        <createSequence incrementBy="1"
+                        sequenceName="word_to_user_sequence"
+                        startValue="1"/>
+    </changeSet>
+
+    <changeSet author="abudai" id="word-to-user-table">
+        <createTable tableName="word_to_user">
+            <column name="id" type="BIGINT" defaultValueComputed="word_to_user_sequence.nextval">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="word_to_user_sequence_pkey"/>
+            </column>
+            <column name="word_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+            <column name="category_id" type="BIGINT"/>
+            <column name="number_of_answers" type="BIGINT" defaultValue="0"/>
+            <column name="number_of_correct_answers" type="BIGINT" defaultValue="0"/>
+            <column name="date_of_last_answer" type="TIMESTAMP WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="abudai" id="category-id-to-word-fk">
+        <addForeignKeyConstraint baseColumnNames="category_id" baseTableName="word_to_user"
+                                 constraintName="category_id_to_word_fk" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="category" validate="true"/>
+    </changeSet>
+
+    <changeSet author="abudai" id="word-to-word-to-user-fk">
+        <addForeignKeyConstraint baseColumnNames="word_id" baseTableName="word_to_user"
+                                 constraintName="word_to_word_to_user_fk" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="word" validate="true"/>
+    </changeSet>
+
+    <changeSet author="abudai" id="user-to-word-to-user-fk">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="word_to_user"
+                                 constraintName="user_to_word_to_user_fk" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

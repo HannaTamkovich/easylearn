@@ -1,0 +1,29 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="abudai" id="USER_SEQUENCE">
+        <createSequence incrementBy="1"
+                        sequenceName="user_sequence"
+                        startValue="1"/>
+    </changeSet>
+
+    <changeSet author="abudai" id="user-table">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_pkey"/>
+            </column>
+
+            <column name="username" type="NVARCHAR(255)"/>
+            <column name="first_name" type="NVARCHAR(255)"/>
+            <column name="second_name" type="NVARCHAR(255)"/>
+            <column name="middle_name" type="NVARCHAR(255)"/>
+            <column name="email" type="NVARCHAR(255)"/>
+            <column name="pass" type="NVARCHAR(500)"/>
+            <column name="language" type="NVARCHAR(255)"/>
+            <column name="date_of_last_visit" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="deleted" type="BOOLEAN"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
