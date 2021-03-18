@@ -2,13 +2,15 @@ package com.easylearn.easylearn.word.service;
 
 import com.easylearn.easylearn.category.repository.CategoryRepository;
 import com.easylearn.easylearn.category.repository.entity.CategoryEntity;
+import com.easylearn.easylearn.core.dto.response.PageResult;
 import com.easylearn.easylearn.core.exception.DuplicateException;
 import com.easylearn.easylearn.core.exception.EntityNotFoundException;
 import com.easylearn.easylearn.core.exception.ServiceException;
 import com.easylearn.easylearn.handbook.russianword.repository.RussianWordRepository;
 import com.easylearn.easylearn.security.service.CurrentUserService;
-import com.easylearn.easylearn.security.user.model.UserAccount;
-import com.easylearn.easylearn.security.user.service.UserAccountService;
+import com.easylearn.easylearn.security.user.model.User;
+import com.easylearn.easylearn.security.user.service.UserService;
+import com.easylearn.easylearn.word.dto.CardFilter;
 import com.easylearn.easylearn.word.dto.WordFilter;
 import com.easylearn.easylearn.word.dto.WordParam;
 import com.easylearn.easylearn.word.model.Card;
@@ -19,12 +21,14 @@ import com.easylearn.easylearn.word.repository.converter.WordEntityConverter;
 import com.easylearn.easylearn.word.repository.entity.WordEntity;
 import com.easylearn.easylearn.word.repository.entity.WordEntity_;
 import com.easylearn.easylearn.word.repository.entity.WordToUserEntity;
+import com.easylearn.easylearn.word.repository.specification.CardSpecMaker;
 import com.easylearn.easylearn.word.repository.specification.WordSpecMaker;
 import com.easylearn.easylearn.word.service.converter.WordParamConverter;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +37,6 @@ import org.springframework.validation.annotation.Validated;
 import javax.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -50,7 +53,7 @@ public class WordServiceImpl implements WordService {
     private final RussianWordRepository russianWordRepository;
 
     private final CurrentUserService currentUserService;
-    private final UserAccountService userAccountService;
+    private final UserService userService;
 
     private final WordParamConverter wordParamConverter;
     private final WordEntityConverter wordEntityConverter;
@@ -83,17 +86,15 @@ public class WordServiceImpl implements WordService {
     @Override
     @NotNull
     @Transactional(readOnly = true)
-    public Collection<Card> findAllCards(@NotNull WordFilter wordFilter) {
+    public PageResult<Card> findAllCards(@NotNull CardFilter cardFilter) {
         log.info("Find cards by filter");
 
-        var currentUser = userAccountService.loadByUsername(currentUserService.getUsername());
-        wordFilter.setUserId(currentUser.getId());
-        wordFilter.setLanguages(List.of(currentUser.getLanguage()));
+        var pagination = PageRequest.of(cardFilter.getPageNumber(), cardFilter.getPageSize());
 
-        //TODO сортировать по дате последнего ответа
-        var spec = WordSpecMaker.makeSpec(wordFilter);
-        var wordEntities = wordRepository.findAll(spec);
-        var words = wordEntityConverter.toModels(wordEntities);
+        //TODO sort by date
+        var spec = CardSpecMaker.makeSpec(userService.loadByUsername(currentUserService.getUsername()).getId());
+        var wordEntities = wordRepository.findAll(spec, pagination);
+        var words = wordEntityConverter.toModel(wordEntities);
 
         return convertToCard(words);
     }
@@ -112,6 +113,7 @@ public class WordServiceImpl implements WordService {
                 });
 
         addToMyWords(wordEntity.getId());
+        addToCategory(wordEntity.getId(), wordParam.getCategoryId());
 
         log.debug("Word has been created");
     }
@@ -122,7 +124,7 @@ public class WordServiceImpl implements WordService {
         log.info("Update word ({})", id);
 
         var word = findById(id);
-        var currentUser = userAccountService.loadByUsername(currentUserService.getUsername());
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
 
         if (StringUtils.equals(word.getWord(), wordParam.getWord()) &&
                 StringUtils.equals(word.getTranslation(), wordParam.getTranslation()) &&
@@ -152,7 +154,7 @@ public class WordServiceImpl implements WordService {
     public void delete(@NotNull Long id) {
         log.info("Delete word ({})", id);
 
-        var currentUser = userAccountService.loadByUsername(currentUserService.getUsername());
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
         validateWordForDeleting(id, currentUser);
 
         var countByWordId = wordToUserRepository.countByWordId(id);
@@ -167,39 +169,6 @@ public class WordServiceImpl implements WordService {
         }
 
         log.debug("Word has been deleted");
-    }
-
-    @Override
-    @Transactional
-    public void addToCategory(@NotNull Long id, @NotNull Long categoryId) {
-        log.info("Add word ({}) to category ({})", id, categoryId);
-
-        var categoryEntity = getCategoryEntity(categoryId);
-        validateWordLanguageToAddToCategory(id, categoryEntity);
-
-        var currentUser = userAccountService.loadByUsername(currentUserService.getUsername());
-
-        var wordToUserEntity = wordToUserRepository.findByWordIdAndUserId(id, currentUser.getId()).orElseThrow();
-        wordToUserEntity.setCategory(categoryEntity);
-
-        wordToUserRepository.save(wordToUserEntity);
-
-        log.debug("Word has been added to category");
-    }
-
-    @Override
-    @Transactional
-    public void removeFromCategory(@NotNull Long id, @NotNull Long categoryId) {
-        log.info("Remove word ({}) from category ({})", id, categoryId);
-
-        var currentUser = userAccountService.loadByUsername(currentUserService.getUsername());
-
-        var wordToUserEntity = wordToUserRepository.findByWordIdAndUserIdAndCategory_Id(id, currentUser.getId(), categoryId);
-        wordToUserEntity.setCategory(null);
-
-        wordToUserRepository.save(wordToUserEntity);
-
-        log.debug("Word has been removed from category");
     }
 
     @NotNull
@@ -224,25 +193,57 @@ public class WordServiceImpl implements WordService {
 
     }
 
-    private Collection<Card> convertToCard(Collection<Word> words) {
-        return words.stream()
+    private PageResult<Card> convertToCard(PageResult<Word> wordPageResult) {
+        var content = wordPageResult.getContent().stream()
                 .map(it -> {
                     var randomWords = Set.of(
-                            russianWordRepository.getOne(3491911L).getWord(),
-                            russianWordRepository.getOne(62L).getWord(),
-                            russianWordRepository.getOne(4098636L).getWord(),
-                            it.getTranslation()
+                            russianWordRepository.findRussianWord().getWord().toLowerCase(),
+                            russianWordRepository.findRussianWord().getWord().toLowerCase(),
+                            russianWordRepository.findRussianWord().getWord().toLowerCase(),
+                            it.getTranslation().toLowerCase()
                     );
                     return Card.builder()
                             .id(it.getId())
                             .word(it.getWord())
                             .translations(randomWords)
-                            .category(it.getCategory())
                             .build();
                 }).collect(Collectors.toSet());
+
+        return new PageResult<>(content, wordPageResult.getTotalPages(), wordPageResult.getTotalElements(), wordPageResult.getNumber());
     }
 
-    private void deleteFromUserList(Long wordId, UserAccount currentUser) {
+    private void addToCategory(Long id, Long categoryId) {
+        var categoryEntity = getCategoryEntity(categoryId);
+        validateWordLanguageToAddToCategory(id, categoryEntity);
+
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+
+        var wordToUserEntity = wordToUserRepository.findEntityByWordIdAndUserId(id, currentUser.getId()).orElseThrow();
+        wordToUserEntity.setCategory(categoryEntity);
+
+        wordToUserRepository.save(wordToUserEntity);
+    }
+
+    public void updateCategory(Word word, WordParam wordParam) {
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+
+        var wordToUserEntity = wordToUserRepository.findByWordIdAndUserId(word.getId(), currentUser.getId());
+
+        if (Objects.nonNull(wordToUserEntity.getCategory()) && Objects.isNull(wordParam.getCategoryId())) {
+            removeFromCategory(wordToUserEntity);
+
+        } else if (Objects.isNull(wordToUserEntity.getCategory()) && Objects.nonNull(wordParam.getCategoryId())) {
+            addToCategory(word.getId(), wordParam.getCategoryId());
+        }
+    }
+
+    public void removeFromCategory(WordToUserEntity wordToUserEntity) {
+        wordToUserEntity.setCategory(null);
+
+        wordToUserRepository.save(wordToUserEntity);
+    }
+
+    private void deleteFromUserList(Long wordId, User currentUser) {
         wordToUserRepository.deleteByUserIdAndWordId(currentUser.getId(), wordId);
     }
 
@@ -254,37 +255,12 @@ public class WordServiceImpl implements WordService {
     private Word updateFields(Word word, WordParam wordParam) {
         word.setWord(wordParam.getWord());
         word.setTranslation(wordParam.getTranslation());
+        updateCategory(word, wordParam);
         return word;
     }
 
-    private CategoryEntity getCategoryEntity(Long categoryId) {
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new EntityNotFoundException(CategoryEntity.class.getSimpleName(), categoryId));
-    }
-
-    private void validatingForDuplication(Long wordId, UserAccount currentUser) {
-        if (wordToUserRepository.existsByUserIdAndWordId(currentUser.getId(), wordId)) {
-            throw new DuplicateException("Слово было добавлено ранее.");
-        }
-    }
-
-    private void validateWordForDeleting(Long wordId, UserAccount currentUser) {
-        if (!wordToUserRepository.existsByUserIdAndWordId(currentUser.getId(), wordId)) {
-            throw new ServiceException("Слово не было найдено в Вашем списке слов.");
-        }
-    }
-
-    private void validateWordLanguageToAddToCategory(Long id, CategoryEntity categoryEntity) {
-        var wordLanguage = findById(id).getLanguage();
-        if (!Objects.equals(wordLanguage, categoryEntity.getLanguage())) {
-            throw new ServiceException("Слово и категория имеют различные языки.");
-        }
-    }
-
-    private void addToMyWords(@NotNull Long id) {
-        log.info("Add word ({}) to current user", id);
-
-        var currentUser = userAccountService.loadByUsername(currentUserService.getUsername());
+    private void addToMyWords(Long id) {
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
         validatingForDuplication(id, currentUser);
 
         var wordToUserEntity = WordToUserEntity.builder()
@@ -295,7 +271,29 @@ public class WordServiceImpl implements WordService {
                 .dateOfLastAnswer(Instant.now())
                 .build();
         wordToUserRepository.save(wordToUserEntity);
+    }
 
-        log.debug("Word has been added");
+    private CategoryEntity getCategoryEntity(Long categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new EntityNotFoundException(CategoryEntity.class.getSimpleName(), categoryId));
+    }
+
+    private void validatingForDuplication(Long wordId, User currentUser) {
+        if (wordToUserRepository.existsByUserIdAndWordId(currentUser.getId(), wordId)) {
+            throw new DuplicateException("Слово было добавлено ранее.");
+        }
+    }
+
+    private void validateWordForDeleting(Long wordId, User currentUser) {
+        if (!wordToUserRepository.existsByUserIdAndWordId(currentUser.getId(), wordId)) {
+            throw new ServiceException("Слово не было найдено в Вашем списке слов.");
+        }
+    }
+
+    private void validateWordLanguageToAddToCategory(Long id, CategoryEntity categoryEntity) {
+        var wordLanguage = findById(id).getLanguage();
+        if (!Objects.equals(wordLanguage, categoryEntity.getLanguage())) {
+            throw new ServiceException("Слово и категория имеют различные языки.");
+        }
     }
 }

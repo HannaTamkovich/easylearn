@@ -21,17 +21,17 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 
-import static com.easylearn.easylearn.security.user.model.UserAccount.MAX_NAME_SIZE;
-import static com.easylearn.easylearn.security.user.model.UserAccount.MAX_USERNAME_SIZE;
-import static com.easylearn.easylearn.security.user.model.UserAccount.MIN_NAME_SIZE;
-import static com.easylearn.easylearn.security.user.model.UserAccount.MIN_USERNAME_SIZE;
+import static com.easylearn.easylearn.security.user.model.User.MAX_NAME_SIZE;
+import static com.easylearn.easylearn.security.user.model.User.MAX_USERNAME_SIZE;
+import static com.easylearn.easylearn.security.user.model.User.MIN_NAME_SIZE;
+import static com.easylearn.easylearn.security.user.model.User.MIN_USERNAME_SIZE;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
-public class UserAccountEntity implements Serializable {
+public class UserEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -1965425860331001828L;

@@ -14,7 +14,5 @@ public interface CurrentUserService {
 
     boolean isLoggedIn();
 
-    boolean isUserHaveFullAccess();
-
     Language getLanguage();
 }

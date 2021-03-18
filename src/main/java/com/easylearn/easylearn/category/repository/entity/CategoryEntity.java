@@ -1,7 +1,7 @@
 package com.easylearn.easylearn.category.repository.entity;
 
 import com.easylearn.easylearn.language.model.Language;
-import com.easylearn.easylearn.security.user.repository.entity.UserAccountEntity;
+import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,5 +44,5 @@ public class CategoryEntity implements Serializable {
     @NotNull
     @OneToOne
     //@Column(name = "user_account_id")
-    private UserAccountEntity userAccount;
+    private UserEntity userAccount;
 }

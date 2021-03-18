@@ -26,11 +26,6 @@ public class DefaultCurrentUserService implements CurrentUserService {
     }
 
     @Override
-    public boolean isUserHaveFullAccess() {
-        return userAccountProvider.getUserAccount().getRole().isAdmin();
-    }
-
-    @Override
     public Language getLanguage() {
         checkUserIsLoggedIn();
 

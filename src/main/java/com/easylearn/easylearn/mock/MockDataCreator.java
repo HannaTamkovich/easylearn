@@ -4,10 +4,10 @@ import com.easylearn.easylearn.category.model.Category;
 import com.easylearn.easylearn.category.repository.CategoryRepository;
 import com.easylearn.easylearn.category.repository.converter.CategoryEntityConverter;
 import com.easylearn.easylearn.language.model.Language;
-import com.easylearn.easylearn.security.user.model.UserAccount;
-import com.easylearn.easylearn.security.user.repository.UserAccountRepository;
-import com.easylearn.easylearn.security.user.repository.converter.UserAccountEntityConverter;
-import com.easylearn.easylearn.security.user.service.UserAccountService;
+import com.easylearn.easylearn.security.user.model.User;
+import com.easylearn.easylearn.security.user.repository.UserRepository;
+import com.easylearn.easylearn.security.user.repository.converter.UserEntityConverter;
+import com.easylearn.easylearn.security.user.service.UserService;
 import com.easylearn.easylearn.word.model.Word;
 import com.easylearn.easylearn.word.repository.WordRepository;
 import com.easylearn.easylearn.word.repository.WordToUserRepository;
@@ -33,12 +33,12 @@ import java.util.List;
 public class MockDataCreator {
 
     private final CategoryRepository categoryRepository;
-    private final UserAccountRepository userAccountRepository;
+    private final UserRepository userRepository;
 
-    private final UserAccountService userAccountService;
+    private final UserService userService;
 
     private final CategoryEntityConverter categoryEntityConverter;
-    private final UserAccountEntityConverter userAccountEntityConverter;
+    private final UserEntityConverter userEntityConverter;
 
     private final WordRepository wordRepository;
     private final WordEntityConverter wordEntityConverter;
@@ -102,7 +102,7 @@ public class MockDataCreator {
                         .role(Role.ADMIN)
                         .dateOfLastVisit(Instant.now())
                         .build(),*/
-                UserAccount.builder()
+                User.builder()
                         .username("user")
                         .firstName("user")
                         .middleName("user")
@@ -155,7 +155,7 @@ public class MockDataCreator {
                         .dateOfLastVisit(Instant.now())
                         .build()*/
         );
-        userAccountRepository.saveAll(userAccountEntityConverter.toEntities(users));
+        userRepository.saveAll(userEntityConverter.toEntities(users));
     }
 
     private void createCategories() {
@@ -163,17 +163,17 @@ public class MockDataCreator {
                 Category.builder()
                         .name("Дом")
                         .language(Language.ENGLISH)
-                        .userAccount(userAccountService.loadByUsername("admin"))
+                        .user(userService.loadByUsername("admin"))
                         .build(),
                 Category.builder()
                         .name("Магазин")
                         .language(Language.SPANISH)
-                        .userAccount(userAccountService.loadByUsername("spanish_a"))
+                        .user(userService.loadByUsername("spanish_a"))
                         .build(),
                 Category.builder()
                         .name("Транспорт")
                         .language(Language.GERMAN)
-                        .userAccount(userAccountService.loadByUsername("german_a"))
+                        .user(userService.loadByUsername("german_a"))
                         .build());
 
         categoryRepository.saveAll(categoryEntityConverter.toEntities(categories));

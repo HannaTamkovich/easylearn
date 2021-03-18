@@ -2,8 +2,8 @@ package com.easylearn.easylearn.security.auth.controller;
 
 import com.easylearn.easylearn.security.auth.dto.LoginParam;
 import com.easylearn.easylearn.security.auth.service.TokenStoreService;
-import com.easylearn.easylearn.security.user.dto.BaseUserAccountParam;
-import com.easylearn.easylearn.security.user.service.UserAccountService;
+import com.easylearn.easylearn.security.user.dto.BaseUserParam;
+import com.easylearn.easylearn.security.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,7 +30,7 @@ public class AuthController {
     public static final String SIGN_UP_PATH = "/sign-up";
 
     private final TokenStoreService tokenStoreService;
-    private final UserAccountService userAccountService;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
     @Operation(summary = "Login")
@@ -51,8 +51,8 @@ public class AuthController {
     @Operation(summary = "Sign up")
     @ApiResponse(responseCode = "200", description = "Ok", content = @Content())
     @PostMapping(SIGN_UP_PATH)
-    public void createUserAccount(@Valid @NotNull @RequestBody BaseUserAccountParam baseUserAccountParam) {
-        baseUserAccountParam.setPassword(passwordEncoder.encode(baseUserAccountParam.getPassword()));
-        userAccountService.create(baseUserAccountParam);
+    public void createUserAccount(@Valid @NotNull @RequestBody BaseUserParam baseUserParam) {
+        baseUserParam.setPassword(passwordEncoder.encode(baseUserParam.getPassword()));
+        userService.create(baseUserParam);
     }
 }

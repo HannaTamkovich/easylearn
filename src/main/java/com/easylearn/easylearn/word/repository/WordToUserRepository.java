@@ -17,7 +17,7 @@ public interface WordToUserRepository extends JpaRepository<WordToUserEntity, Lo
 
     void deleteByWordId(Long wordId);
 
-    Optional<WordToUserEntity> findByWordIdAndUserId(Long wordId, Long userId);
+    Optional<WordToUserEntity> findEntityByWordIdAndUserId(Long wordId, Long userId);
 
-    WordToUserEntity findByWordIdAndUserIdAndCategory_Id(Long wordId, Long userId, Long categoryId);
+    WordToUserEntity findByWordIdAndUserId(Long wordId, Long userId);
 }

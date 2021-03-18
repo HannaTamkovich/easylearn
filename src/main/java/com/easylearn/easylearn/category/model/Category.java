@@ -1,7 +1,7 @@
 package com.easylearn.easylearn.category.model;
 
 import com.easylearn.easylearn.language.model.Language;
-import com.easylearn.easylearn.security.user.model.UserAccount;
+import com.easylearn.easylearn.security.user.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,5 +25,5 @@ public class Category {
     private Language language;
 
     @NotNull
-    private UserAccount userAccount;
+    private User user;
 }

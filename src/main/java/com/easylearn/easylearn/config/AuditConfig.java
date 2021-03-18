@@ -1,8 +1,8 @@
 package com.easylearn.easylearn.config;
 
-import com.easylearn.easylearn.security.user.model.UserAccount;
-import com.easylearn.easylearn.security.user.repository.converter.UserAccountEntityConverter;
-import com.easylearn.easylearn.security.user.repository.entity.UserAccountEntity;
+import com.easylearn.easylearn.security.user.model.User;
+import com.easylearn.easylearn.security.user.repository.converter.UserEntityConverter;
+import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,13 +17,13 @@ import java.util.Optional;
 @AllArgsConstructor
 public class AuditConfig {
 
-    private final UserAccountEntityConverter userAccountEntityConverter;
+    private final UserEntityConverter userEntityConverter;
 
     @Bean
-    public AuditorAware<UserAccountEntity> auditorAware() {
+    public AuditorAware<UserEntity> auditorAware() {
         return () -> {
-            var userAccount = (UserAccount) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return Optional.of(userAccountEntityConverter.toEntity(userAccount));
+            var userAccount = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return Optional.of(userEntityConverter.toEntity(userAccount));
         };
     }
 

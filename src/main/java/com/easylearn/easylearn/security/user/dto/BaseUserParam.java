@@ -10,15 +10,15 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import static com.easylearn.easylearn.security.user.model.UserAccount.MAX_NAME_SIZE;
-import static com.easylearn.easylearn.security.user.model.UserAccount.MAX_USERNAME_SIZE;
-import static com.easylearn.easylearn.security.user.model.UserAccount.MIN_NAME_SIZE;
-import static com.easylearn.easylearn.security.user.model.UserAccount.MIN_USERNAME_SIZE;
+import static com.easylearn.easylearn.security.user.model.User.MAX_NAME_SIZE;
+import static com.easylearn.easylearn.security.user.model.User.MAX_USERNAME_SIZE;
+import static com.easylearn.easylearn.security.user.model.User.MIN_NAME_SIZE;
+import static com.easylearn.easylearn.security.user.model.User.MIN_USERNAME_SIZE;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BaseUserAccountParam {
+public class BaseUserParam {
 
     @Size(min = MIN_USERNAME_SIZE, max = MAX_USERNAME_SIZE)
     private String username;

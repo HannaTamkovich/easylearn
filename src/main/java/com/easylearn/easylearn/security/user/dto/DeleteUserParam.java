@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DeleteUserAccountParam {
+public class DeleteUserParam {
 
     @NotNull
     private Long id;

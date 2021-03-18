@@ -1,10 +1,10 @@
 package com.easylearn.easylearn.security.service;
 
 
-import com.easylearn.easylearn.security.user.model.UserAccount;
+import com.easylearn.easylearn.security.user.model.User;
 
 public interface UserInfoAccountProvider {
-    UserAccount load();
+    User load();
 
-    UserAccount getUserAccount();
+    User getUserAccount();
 }

@@ -22,7 +22,7 @@ import java.util.Collections;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserAccount implements UserDetails {
+public class User implements UserDetails {
 
     public static final int MIN_USERNAME_SIZE = 1;
     public static final int MAX_USERNAME_SIZE = 255;
@@ -72,9 +72,6 @@ public class UserAccount implements UserDetails {
     private Language language;
 
     @NotNull
-    private Role role = Role.USER;
-
-    @NotNull
     private Instant dateOfLastVisit;
 
     @NotNull
@@ -82,7 +79,7 @@ public class UserAccount implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(getRole());
+        return Collections.emptyList();
     }
 
     @Override

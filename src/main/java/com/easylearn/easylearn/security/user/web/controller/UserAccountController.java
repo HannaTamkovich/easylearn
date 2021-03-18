@@ -2,9 +2,9 @@ package com.easylearn.easylearn.security.user.web.controller;
 
 import com.easylearn.easylearn.core.dto.response.ErrorResponse;
 import com.easylearn.easylearn.security.service.CurrentUserService;
-import com.easylearn.easylearn.security.user.service.UserAccountService;
-import com.easylearn.easylearn.security.user.web.converter.UserAccountWebConverter;
-import com.easylearn.easylearn.security.user.web.dto.UserAccountResponse;
+import com.easylearn.easylearn.security.user.service.UserService;
+import com.easylearn.easylearn.security.user.web.converter.UserWebConverter;
+import com.easylearn.easylearn.security.user.web.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,19 +30,19 @@ import java.util.Collection;
 @CrossOrigin
 public class UserAccountController {
 
-    private final UserAccountService userAccountService;
-    private final UserAccountWebConverter userAccountWebConverter;
+    private final UserService userAccountService;
+    private final UserWebConverter userAccountWebConverter;
     private final CurrentUserService currentUserService;
 
     @Operation(summary = "Get all users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = UserAccountResponse.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = UserResponse.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content())
     })
     @GetMapping
-    public Collection<UserAccountResponse> findAll() {
+    public Collection<UserResponse> findAll() {
         var users = userAccountService.findAll();
         return userAccountWebConverter.toResponses(users);
     }
@@ -51,11 +51,11 @@ public class UserAccountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = UserAccountResponse.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = UserResponse.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content())
     })
     @GetMapping("/me")
-    public UserAccountResponse me() {
+    public UserResponse me() {
         var user = userAccountService.loadByUsername(currentUserService.getUsername());
         return userAccountWebConverter.toResponse(user);
     }
@@ -64,13 +64,13 @@ public class UserAccountController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = UserAccountResponse.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = UserResponse.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content()),
             @ApiResponse(responseCode = "404", description = "Not found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/{username}")
-    public UserAccountResponse read(@NotNull @PathVariable String username) {
+    public UserResponse read(@NotNull @PathVariable String username) {
         var user = userAccountService.loadByUsername(username);
         return userAccountWebConverter.toResponse(user);
     }

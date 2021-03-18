@@ -2,6 +2,8 @@ package com.easylearn.easylearn.word.web.controller;
 
 import com.easylearn.easylearn.category.web.dto.CategoryResponse;
 import com.easylearn.easylearn.core.dto.response.ErrorResponse;
+import com.easylearn.easylearn.core.dto.response.PageResult;
+import com.easylearn.easylearn.word.dto.CardFilter;
 import com.easylearn.easylearn.word.dto.WordFilter;
 import com.easylearn.easylearn.word.dto.WordParam;
 import com.easylearn.easylearn.word.service.WordService;
@@ -41,8 +43,6 @@ public class WordController {
     public static final String WORD_PATH = "/words";
     public static final String CARD_PATH = "/cards";
     public static final String PATH_BY_ID = WORD_PATH + "/{id}";
-    public static final String PATH_ADD_TO_CATEGORY = WORD_PATH + "/{id}/category/{categoryId}";
-    public static final String PATH_REMOVE_FROM_CATEGORY = WORD_PATH + "/{id}/category/{categoryId}";
     public static final String PATH_ANSWER = WORD_PATH + "/{id}/answer";
 
     private final WordService wordService;
@@ -95,10 +95,10 @@ public class WordController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
     })
     @GetMapping(CARD_PATH)
-    public Collection<CardResponse> findAllCards(@NotNull @Valid WordFilter wordFilter) {
+    public PageResult<CardResponse> findAllCards(@NotNull @Valid CardFilter cardFilter) {
         //TODO сделать пагинированный список
-        var cards = wordService.findAllCards(wordFilter);
-        return cardWebConverter.toResponses(cards);
+        var cards = wordService.findAllCards(cardFilter);
+        return cardWebConverter.toResponse(cards);
     }
 
     @Operation(summary = "Create word")
@@ -145,36 +145,6 @@ public class WordController {
     @DeleteMapping(PATH_BY_ID)
     public void delete(@NotNull @PathVariable("id") Long id) {
         wordService.delete(id);
-    }
-
-    @Operation(summary = "Add word to category")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema)),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
-    @PutMapping(PATH_ADD_TO_CATEGORY)
-    public void addToCategory(@NotNull @PathVariable("id") Long id, @NotNull @PathVariable("categoryId") Long categoryId) {
-        wordService.addToCategory(id, categoryId);
-    }
-
-    @Operation(summary = "Remove word from category")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema)),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
-    @DeleteMapping(PATH_REMOVE_FROM_CATEGORY)
-    public void removeFromCategory(@NotNull @PathVariable("id") Long id, @NotNull @PathVariable("categoryId") Long categoryId) {
-        wordService.removeFromCategory(id, categoryId);
     }
 
     @Operation(summary = "Answer word")

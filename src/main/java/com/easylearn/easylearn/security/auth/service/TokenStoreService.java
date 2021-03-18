@@ -1,7 +1,7 @@
 package com.easylearn.easylearn.security.auth.service;
 
 import com.easylearn.easylearn.security.auth.dto.LoginParam;
-import com.easylearn.easylearn.security.user.model.UserAccount;
+import com.easylearn.easylearn.security.user.model.User;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.validation.Valid;
@@ -15,5 +15,5 @@ public interface TokenStoreService {
 
     void remove(@NotNull String token);
 
-    Optional<UserAccount> findByToken(@NotNull String token);
+    Optional<User> findByToken(@NotNull String token);
 }
