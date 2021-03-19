@@ -96,7 +96,6 @@ public class WordController {
     })
     @GetMapping(CARD_PATH)
     public PageResult<CardResponse> findAllCards(@NotNull @Valid CardFilter cardFilter) {
-        //TODO сделать пагинированный список
         var cards = wordService.findAllCards(cardFilter);
         return cardWebConverter.toResponse(cards);
     }

@@ -52,7 +52,8 @@ public class UserAccountController {
             @ApiResponse(responseCode = "200", description = "Ok",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = UserResponse.class)))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content())
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/me")
     public UserResponse me() {

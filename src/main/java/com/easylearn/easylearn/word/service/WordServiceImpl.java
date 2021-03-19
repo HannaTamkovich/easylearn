@@ -22,7 +22,6 @@ import com.easylearn.easylearn.word.repository.entity.WordEntity;
 import com.easylearn.easylearn.word.repository.entity.WordEntity_;
 import com.easylearn.easylearn.word.repository.entity.WordToUserEntity;
 import com.easylearn.easylearn.word.repository.specification.CardSpecMaker;
-import com.easylearn.easylearn.word.repository.specification.WordSpecMaker;
 import com.easylearn.easylearn.word.service.converter.WordParamConverter;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
@@ -38,6 +37,7 @@ import javax.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -77,8 +77,9 @@ public class WordServiceImpl implements WordService {
     public Collection<Word> findAll(@NotNull WordFilter wordFilter) {
         log.info("Find word by filter");
 
-        var spec = WordSpecMaker.makeSpec(wordFilter);
-        var wordEntities = wordRepository.findAll(spec, defaultSort);
+        //var spec = WordSpecMaker.makeSpec(wordFilter);
+        //var wordEntities = wordRepository.findAll(spec, defaultSort);
+        var wordEntities = wordRepository.findAll(defaultSort);
 
         return wordEntityConverter.toModels(wordEntities);
     }
@@ -113,7 +114,8 @@ public class WordServiceImpl implements WordService {
                 });
 
         addToMyWords(wordEntity.getId());
-        addToCategory(wordEntity.getId(), wordParam.getCategoryId());
+        Optional.ofNullable(wordParam.getCategoryId())
+                .ifPresent(it -> addToCategory(wordEntity.getId(), it));
 
         log.debug("Word has been created");
     }

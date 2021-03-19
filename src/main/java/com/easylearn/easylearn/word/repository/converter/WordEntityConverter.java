@@ -33,7 +33,7 @@ public class WordEntityConverter {
 
     @NotNull
     public Collection<Word> toModels(@NotNull Collection<WordEntity> wordEntities) {
-        return wordEntities.stream().map(this::toModel).collect(Collectors.toSet());
+        return wordEntities.stream().map(this::toModel).collect(Collectors.toList());
     }
 
     @NotNull
@@ -43,7 +43,7 @@ public class WordEntityConverter {
 
     @NotNull
     public Collection<WordEntity> toEntities(@NotNull Collection<Word> word) {
-        return word.stream().map(this::toEntity).collect(Collectors.toSet());
+        return word.stream().map(this::toEntity).collect(Collectors.toList());
     }
 
 }

@@ -32,6 +32,6 @@ public class CardWebConverter {
 
     @NotNull
     public Collection<CardResponse> toResponses(@NotNull Collection<Card> cards) {
-        return cards.stream().map(this::toResponse).collect(Collectors.toSet());
+        return cards.stream().map(this::toResponse).collect(Collectors.toList());
     }
 }
