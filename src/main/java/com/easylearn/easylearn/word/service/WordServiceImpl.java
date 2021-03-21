@@ -22,6 +22,7 @@ import com.easylearn.easylearn.word.repository.entity.WordEntity;
 import com.easylearn.easylearn.word.repository.entity.WordEntity_;
 import com.easylearn.easylearn.word.repository.entity.WordToUserEntity;
 import com.easylearn.easylearn.word.repository.specification.CardSpecMaker;
+import com.easylearn.easylearn.word.repository.specification.WordSpecMaker;
 import com.easylearn.easylearn.word.service.converter.WordParamConverter;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
@@ -59,6 +60,7 @@ public class WordServiceImpl implements WordService {
     private final WordEntityConverter wordEntityConverter;
 
     private final Sort defaultSort = Sort.by(WordEntity_.WORD).ascending();
+    private final Sort defaultSortUserWords = Sort.by(WordToUserEntity_.DATE_OF_LAST_ANSWER).ascending();
 
     @Override
     @NotNull
@@ -77,9 +79,8 @@ public class WordServiceImpl implements WordService {
     public Collection<Word> findAll(@NotNull WordFilter wordFilter) {
         log.info("Find word by filter");
 
-        //var spec = WordSpecMaker.makeSpec(wordFilter);
-        //var wordEntities = wordRepository.findAll(spec, defaultSort);
-        var wordEntities = wordRepository.findAll(defaultSort);
+        var spec = WordSpecMaker.makeSpec(wordFilter);
+        var wordEntities = wordRepository.findAll(spec, defaultSort);
 
         return wordEntityConverter.toModels(wordEntities);
     }
@@ -93,9 +94,15 @@ public class WordServiceImpl implements WordService {
         var pagination = PageRequest.of(cardFilter.getPageNumber(), cardFilter.getPageSize());
 
         //TODO sort by date
-        var spec = CardSpecMaker.makeSpec(userService.loadByUsername(currentUserService.getUsername()).getId());
+        var userId = cardFilter.isOnlyUserWords() ? userService.loadByUsername(currentUserService.getUsername()).getId() : null;
+        var spec = CardSpecMaker.makeSpec(userId);
         var wordEntities = wordRepository.findAll(spec, pagination);
         var words = wordEntityConverter.toModel(wordEntities);
+
+        //TODO
+        var wordToUserEntities = Optional.ofNullable(userId)
+                .map(wordToUserRepository::findAllByUserIdOrderByDateOfLastAnswerAsc)
+                .orElseGet(() -> wordToUserRepository.findAll(defaultSort));
 
         return convertToCard(words);
     }

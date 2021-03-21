@@ -3,6 +3,7 @@ package com.easylearn.easylearn.word.dto;
 import lombok.Data;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 
 @Data
 public class WordFilter {
@@ -10,6 +11,6 @@ public class WordFilter {
     @Nullable
     private Long categoryId;
 
-    @Nullable
-    private Long userId;
+    @NotNull
+    private String username;
 }

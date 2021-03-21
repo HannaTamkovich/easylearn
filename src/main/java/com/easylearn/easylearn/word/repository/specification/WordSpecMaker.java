@@ -1,6 +1,8 @@
 package com.easylearn.easylearn.word.repository.specification;
 
 import com.easylearn.easylearn.category.repository.entity.CategoryEntity_;
+import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
+import com.easylearn.easylearn.security.user.repository.entity.UserEntity_;
 import com.easylearn.easylearn.word.dto.WordFilter;
 import com.easylearn.easylearn.word.repository.entity.WordEntity;
 import com.easylearn.easylearn.word.repository.entity.WordEntity_;
@@ -8,6 +10,7 @@ import com.easylearn.easylearn.word.repository.entity.WordToUserEntity;
 import com.easylearn.easylearn.word.repository.entity.WordToUserEntity_;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Root;
@@ -19,13 +22,13 @@ public final class WordSpecMaker {
     public static Specification<WordEntity> makeSpec(WordFilter filter) {
         var resultSpec = (Specification<WordEntity>) (root, query, builder) -> root.get(WordEntity_.ID).isNotNull();
 
-        if (!Objects.nonNull(filter.getCategoryId())) {
+        if (Objects.nonNull(filter.getCategoryId())) {
             var categoryFilter = categoryFilter(filter.getCategoryId());
             resultSpec = resultSpec.and(categoryFilter);
         }
 
-        if (Objects.nonNull(filter.getUserId())) {
-            var userFilter = userFilter(filter.getUserId());
+        if (StringUtils.isNotBlank(filter.getUsername())) {
+            var userFilter = userFilter(filter.getUsername());
             resultSpec = resultSpec.and(userFilter);
         }
 
@@ -42,11 +45,15 @@ public final class WordSpecMaker {
         };
     }
 
-    private static Specification<WordEntity> userFilter(Long userId) {
+    private static Specification<WordEntity> userFilter(String username) {
         return (root, query, builder) -> {
             query.distinct(true);
             Root<WordToUserEntity> wordToUserEntityRoot = query.from(WordToUserEntity.class);
-            var userPredicate = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.USER_ID), userId);
+            Root<UserEntity> userEntityRoot = query.from(UserEntity.class);
+            var userPredicate = builder.and(
+                    builder.equal(userEntityRoot.get(UserEntity_.USERNAME), username),
+                    builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.USER_ID), userEntityRoot.get(UserEntity_.ID))
+            );
             var wordPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.WORD_ID), root.get(WordEntity_.ID));
             return builder.and(userPredicate, wordPredicates);
         };
