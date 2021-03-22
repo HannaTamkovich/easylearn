@@ -3,7 +3,6 @@ package com.easylearn.easylearn.security.user.service;
 import com.easylearn.easylearn.core.exception.DuplicateException;
 import com.easylearn.easylearn.core.exception.EntityNotFoundException;
 import com.easylearn.easylearn.security.user.dto.BaseUserParam;
-import com.easylearn.easylearn.security.user.dto.DeleteUserParam;
 import com.easylearn.easylearn.security.user.model.User;
 import com.easylearn.easylearn.security.user.repository.UserRepository;
 import com.easylearn.easylearn.security.user.repository.converter.UserEntityConverter;
@@ -11,12 +10,11 @@ import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import com.easylearn.easylearn.security.user.service.converter.UserParamConverter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.Collection;
@@ -32,8 +30,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserEntityConverter userEntityConverter;
     private final UserParamConverter userParamConverter;
-
-    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     @Override
@@ -53,7 +49,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User loadByUsername(@NotNull String username) {
         log.debug("Reading user: '{}'", username);
-        var userEntity = loadUserAccount(username);
+        var userEntity = loadUserEntity(username);
         var userAccount = userEntityConverter.toModel(userEntity);
         log.debug("User has been read: '{}'", userAccount);
         return userAccount;
@@ -103,17 +99,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void update(@NotNull @Valid BaseUserParam baseUserParam) {
+    public void update(@NotBlank String username, @NotNull @Valid BaseUserParam baseUserParam) {
         //TODO implementation
     }
 
     @Override
     @Transactional
-    public void delete(@NotNull DeleteUserParam deleteUserParam) {
+    public void delete(@NotBlank String username) {
         log.info("Deleting user");
 
-        var userAccount = loadById(deleteUserParam.getId());
-        validatePassword(userAccount, deleteUserParam.getPassword());
+        var userAccount = loadByUsername(username);
 
         userAccount.setDeleted(true);
         userRepository.save(userEntityConverter.toEntity(userAccount));
@@ -121,7 +116,7 @@ public class UserServiceImpl implements UserService {
         log.debug("User has been deleted");
     }
 
-    private UserEntity loadUserAccount(String username) {
+    private UserEntity loadUserEntity(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> {
                     log.error("User account '{}' not found", username);
@@ -132,12 +127,6 @@ public class UserServiceImpl implements UserService {
     private void validateUserByUsername(BaseUserParam baseUserParam) {
         if (existsByUsername(baseUserParam.getUsername())) {
             throw new DuplicateException(format("Логин ('%s') занят. Необходимо ввести другой логин", baseUserParam.getUsername()));
-        }
-    }
-
-    private void validatePassword(User user, String password) {
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new BadCredentialsException("Неверный пароль");
         }
     }
 }

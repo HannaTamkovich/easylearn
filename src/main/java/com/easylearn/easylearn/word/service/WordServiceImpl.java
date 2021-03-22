@@ -21,13 +21,13 @@ import com.easylearn.easylearn.word.repository.converter.WordEntityConverter;
 import com.easylearn.easylearn.word.repository.entity.WordEntity;
 import com.easylearn.easylearn.word.repository.entity.WordEntity_;
 import com.easylearn.easylearn.word.repository.entity.WordToUserEntity;
+import com.easylearn.easylearn.word.repository.entity.WordToUserEntity_;
 import com.easylearn.easylearn.word.repository.specification.CardSpecMaker;
 import com.easylearn.easylearn.word.repository.specification.WordSpecMaker;
 import com.easylearn.easylearn.word.service.converter.WordParamConverter;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -135,13 +135,6 @@ public class WordServiceImpl implements WordService {
         var word = findById(id);
         var currentUser = userService.loadByUsername(currentUserService.getUsername());
 
-        if (StringUtils.equals(word.getWord(), wordParam.getWord()) &&
-                StringUtils.equals(word.getTranslation(), wordParam.getTranslation()) &&
-                word.getLanguage() == currentUser.getLanguage()) {
-            log.info("None of the fields were updated");
-            return;
-        }
-
         var countByWordId = wordToUserRepository.countByWordId(id);
         if (countByWordId == 1) {
             var updatedWord = updateFields(word, wordParam);
@@ -202,6 +195,16 @@ public class WordServiceImpl implements WordService {
 
     }
 
+    @NotNull
+    @Override
+    @Transactional(readOnly = true)
+    public Collection<Word> findAllWithEmptyCategory() {
+        //TODO
+        var wordEntities = wordRepository.findAll(defaultSort);
+
+        return wordEntityConverter.toModels(wordEntities);
+    }
+
     private PageResult<Card> convertToCard(PageResult<Word> wordPageResult) {
         var content = wordPageResult.getContent().stream()
                 .map(it -> {
@@ -242,6 +245,10 @@ public class WordServiceImpl implements WordService {
             removeFromCategory(wordToUserEntity);
 
         } else if (Objects.isNull(wordToUserEntity.getCategory()) && Objects.nonNull(wordParam.getCategoryId())) {
+            addToCategory(word.getId(), wordParam.getCategoryId());
+
+        } else {
+            removeFromCategory(wordToUserEntity);
             addToCategory(word.getId(), wordParam.getCategoryId());
         }
     }

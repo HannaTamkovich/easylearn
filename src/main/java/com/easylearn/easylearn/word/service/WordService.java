@@ -30,4 +30,7 @@ public interface WordService {
 
     @NotNull
     boolean answer(@NotNull Long id, @NotBlank String selectedValue);
+
+    @NotNull
+    Collection<Word> findAllWithEmptyCategory();
 }

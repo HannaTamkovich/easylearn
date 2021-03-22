@@ -18,7 +18,7 @@ public class WordWebConverter {
 
     @NotNull
     public Collection<WordResponse> toResponses(@NotNull Collection<Word> words) {
-        return words.stream().map(this::toResponse).collect(Collectors.toSet());
+        return words.stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     @NotNull

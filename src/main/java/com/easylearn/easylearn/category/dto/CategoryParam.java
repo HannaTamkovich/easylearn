@@ -1,8 +1,11 @@
 package com.easylearn.easylearn.category.dto;
 
-import com.easylearn.easylearn.language.model.Language;
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import lombok.Data;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class CategoryParam {
@@ -10,6 +13,6 @@ public class CategoryParam {
     @NotNull
     private String name;
 
-    @NotNull
-    private Language language;
+    @Nullable
+    private Set<Long> wordIds = new HashSet<>(1);
 }

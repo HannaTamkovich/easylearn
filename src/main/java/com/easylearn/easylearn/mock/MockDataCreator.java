@@ -51,8 +51,8 @@ public class MockDataCreator {
         log.info("Create mock data for local env");
 
         createUsers();
-        //createCategories();
         createWords();
+        createCategories();
     }
 
     private void createWords() {
@@ -163,17 +163,17 @@ public class MockDataCreator {
                 Category.builder()
                         .name("Дом")
                         .language(Language.ENGLISH)
-                        .user(userService.loadByUsername("admin"))
+                        //.user(userService.loadByUsername("user"))
                         .build(),
                 Category.builder()
                         .name("Магазин")
-                        .language(Language.SPANISH)
-                        .user(userService.loadByUsername("spanish_a"))
+                        .language(Language.ENGLISH)
+                        //.user(userService.loadByUsername("user"))
                         .build(),
                 Category.builder()
                         .name("Транспорт")
-                        .language(Language.GERMAN)
-                        .user(userService.loadByUsername("german_a"))
+                        .language(Language.ENGLISH)
+                        //.user(userService.loadByUsername("user"))
                         .build());
 
         categoryRepository.saveAll(categoryEntityConverter.toEntities(categories));

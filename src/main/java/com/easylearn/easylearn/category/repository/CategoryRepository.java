@@ -12,5 +12,5 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> 
 
     boolean existsByNameAndLanguageAndIdNot(String name, Language language, Long id);
 
-    Collection<CategoryEntity> findAllByUserAccount_Username(String username);
+    Collection<CategoryEntity> findAllByUser_UsernameOrderByName(String username);
 }

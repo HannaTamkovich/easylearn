@@ -23,7 +23,7 @@ public class CategoryEntityConverter {
 
     @NotNull
     public Collection<Category> toModels(@NotNull Collection<CategoryEntity> categoryEntities) {
-        return categoryEntities.stream().map(this::toModel).collect(Collectors.toSet());
+        return categoryEntities.stream().map(this::toModel).collect(Collectors.toList());
     }
 
     @NotNull

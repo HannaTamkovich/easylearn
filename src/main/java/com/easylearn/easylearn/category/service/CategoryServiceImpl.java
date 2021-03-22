@@ -9,7 +9,9 @@ import com.easylearn.easylearn.category.service.converter.CategoryParamConverter
 import com.easylearn.easylearn.core.exception.DuplicateException;
 import com.easylearn.easylearn.core.exception.EntityNotFoundException;
 import com.easylearn.easylearn.core.exception.ServiceException;
+import com.easylearn.easylearn.language.model.Language;
 import com.easylearn.easylearn.security.service.CurrentUserService;
+import com.easylearn.easylearn.security.user.service.UserService;
 import com.easylearn.easylearn.word.repository.WordToUserRepository;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
@@ -30,6 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final WordToUserRepository wordToUserRepository;
 
     private final CurrentUserService currentUserService;
+    private final UserService userService;
 
     private final CategoryEntityConverter categoryEntityConverter;
     private final CategoryParamConverter categoryParamConverter;
@@ -50,7 +53,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Collection<Category> findAllForCurrentUser() {
         log.info("Find all categories for user");
         var currentUserUsername = currentUserService.getUsername();
-        var categoryEntities = categoryRepository.findAllByUserAccount_Username(currentUserUsername);
+        var categoryEntities = categoryRepository.findAllByUser_UsernameOrderByName(currentUserUsername);
         return categoryEntityConverter.toModels(categoryEntities);
     }
 
@@ -59,9 +62,13 @@ public class CategoryServiceImpl implements CategoryService {
     public void create(@NotNull CategoryParam categoryParam) {
         log.info("Create category");
 
-        validatingForDuplication(categoryParam);
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+        var currentUserLanguage = currentUser.getLanguage();
+        validatingForDuplication(categoryParam, currentUserLanguage);
 
         var category = categoryParamConverter.toModel(categoryParam);
+        category.setLanguage(currentUserLanguage);
+        category.setUser(currentUser);
         categoryRepository.save(categoryEntityConverter.toEntity(category));
 
         log.debug("Category has been created");
@@ -72,10 +79,10 @@ public class CategoryServiceImpl implements CategoryService {
     public void update(@NotNull Long id, @NotNull CategoryParam categoryParam) {
         log.info("Update category");
 
-        validateToUpdate(id, categoryParam);
-
         var categoryToUpdate = findById(id);
-        updateFields(categoryToUpdate, categoryParam);
+        validateToUpdate(categoryToUpdate, categoryParam);
+
+        categoryToUpdate.setName(categoryParam.getName());
         categoryRepository.save(categoryEntityConverter.toEntity(categoryToUpdate));
 
         log.debug("Category has been updated");
@@ -92,14 +99,14 @@ public class CategoryServiceImpl implements CategoryService {
         log.debug("Category has been deleted");
     }
 
-    private void validatingForDuplication(CategoryParam categoryParam) {
-        if (categoryRepository.existsByNameAndLanguage(categoryParam.getName(), categoryParam.getLanguage())) {
+    private void validatingForDuplication(CategoryParam categoryParam, Language currentUserLanguage) {
+        if (categoryRepository.existsByNameAndLanguage(categoryParam.getName(), currentUserLanguage)) {
             throw new DuplicateException("Category already exists");
         }
     }
 
-    private void validateToUpdate(Long id, CategoryParam categoryParam) {
-        if (categoryRepository.existsByNameAndLanguageAndIdNot(categoryParam.getName(), categoryParam.getLanguage(), id)) {
+    private void validateToUpdate(Category category, CategoryParam categoryParam) {
+        if (categoryRepository.existsByNameAndLanguageAndIdNot(categoryParam.getName(), category.getLanguage(), category.getId())) {
             throw new DuplicateException("Category already exists");
         }
     }
@@ -108,10 +115,5 @@ public class CategoryServiceImpl implements CategoryService {
         if (wordToUserRepository.existsByCategory_Id(id)) {
             throw new ServiceException("Category has words. Delete them before category deletion");
         }
-    }
-
-    private void updateFields(Category categoryToUpdate, CategoryParam categoryParam) {
-        categoryToUpdate.setName(categoryParam.getName());
-        categoryToUpdate.setLanguage(categoryParam.getLanguage());
     }
 }

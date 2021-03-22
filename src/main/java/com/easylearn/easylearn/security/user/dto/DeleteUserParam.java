@@ -12,9 +12,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class DeleteUserParam {
 
-    @NotNull
-    private Long id;
-
     @NotBlank
     private String password;
 }

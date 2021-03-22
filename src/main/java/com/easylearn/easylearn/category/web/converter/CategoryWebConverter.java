@@ -18,7 +18,7 @@ public class CategoryWebConverter {
 
     @NotNull
     public Collection<CategoryResponse> toResponses(@NotNull Collection<Category> categories) {
-        return categories.stream().map(this::toResponse).collect(Collectors.toSet());
+        return categories.stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     @NotNull

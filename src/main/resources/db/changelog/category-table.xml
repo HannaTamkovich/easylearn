@@ -17,12 +17,12 @@
 
             <column name="name" type="NVARCHAR(255)"/>
             <column name="language" type="NVARCHAR(255)"/>
-            <column name="user_account_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
         </createTable>
     </changeSet>
 
     <changeSet author="abudai" id="category-to-user-fk">
-        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="category"
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="category"
                                  constraintName="category_to_user_account_fk" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="users" validate="true"/>

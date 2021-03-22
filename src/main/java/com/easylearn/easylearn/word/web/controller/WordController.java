@@ -44,6 +44,7 @@ public class WordController {
     public static final String CARD_PATH = "/cards";
     public static final String PATH_BY_ID = WORD_PATH + "/{id}";
     public static final String PATH_ANSWER = WORD_PATH + "/{id}/answer";
+    public static final String PATH_EMPTY_CATEGORY = WORD_PATH + "/empty-category";
 
     private final WordService wordService;
     private final WordWebConverter wordWebConverter;
@@ -79,6 +80,7 @@ public class WordController {
     })
     @GetMapping(WORD_PATH)
     public Collection<WordResponse> findAll(@NotNull @Valid WordFilter wordFilter) {
+        //TODO  добавить категорию в респонс
         var words = wordService.findAll(wordFilter);
         return wordWebConverter.toResponses(words);
     }
@@ -160,4 +162,23 @@ public class WordController {
     public boolean answer(@NotNull @PathVariable("id") Long id, @NotBlank @PathParam(value = "selectedValue") String selectedValue) {
         return wordService.answer(id, selectedValue);
     }
+
+    @Operation(summary = "Get all words")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = WordResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Not found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    @GetMapping(PATH_EMPTY_CATEGORY)
+    public Collection<WordResponse> findAllWithEmptyCategory() {
+        //TODO  добавить категорию в респонс
+        var words = wordService.findAllWithEmptyCategory();
+        return wordWebConverter.toResponses(words);
+    }
+
 }
