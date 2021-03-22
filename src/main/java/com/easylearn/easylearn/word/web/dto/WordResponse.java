@@ -16,4 +16,5 @@ public class WordResponse {
     private Long id;
     private String word;
     private String translation;
+    private CategoryResponse category;
 }

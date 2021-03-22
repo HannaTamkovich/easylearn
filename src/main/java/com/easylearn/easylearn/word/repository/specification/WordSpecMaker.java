@@ -8,6 +8,7 @@ import com.easylearn.easylearn.word.repository.entity.WordEntity;
 import com.easylearn.easylearn.word.repository.entity.WordEntity_;
 import com.easylearn.easylearn.word.repository.entity.WordToUserEntity;
 import com.easylearn.easylearn.word.repository.entity.WordToUserEntity_;
+import com.sun.istack.NotNull;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +34,26 @@ public final class WordSpecMaker {
         }
 
         return resultSpec;
+    }
+
+    public static Specification<WordEntity> makeSpecForFreeWords(@NotNull Long userId) {
+        var resultSpec = (Specification<WordEntity>) (root, query, builder) -> root.get(WordEntity_.ID).isNotNull();
+
+        var wordSpecification = wordFilter(userId);
+        resultSpec = resultSpec.and(wordSpecification);
+
+        return resultSpec;
+    }
+
+    private static Specification<WordEntity> wordFilter(@NotNull Long userId) {
+        return (root, query, builder) -> {
+            query.distinct(true);
+            Root<WordToUserEntity> wordToUserEntityRoot = query.from(WordToUserEntity.class);
+            var wordPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.WORD_ID), root.get(WordEntity_.ID));
+            var userPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.USER_ID), userId);
+            var categoriesPredicate = wordToUserEntityRoot.get(WordToUserEntity_.CATEGORY).isNull();
+            return builder.and(categoriesPredicate, wordPredicates, userPredicates);
+        };
     }
 
     private static Specification<WordEntity> categoryFilter(Long category) {

@@ -33,4 +33,6 @@ public interface WordService {
 
     @NotNull
     Collection<Word> findAllWithEmptyCategory();
+
+    void addToCategory(@NotNull Long id, @NotNull Long categoryId);
 }

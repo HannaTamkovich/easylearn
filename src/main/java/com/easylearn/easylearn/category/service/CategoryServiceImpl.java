@@ -13,14 +13,17 @@ import com.easylearn.easylearn.language.model.Language;
 import com.easylearn.easylearn.security.service.CurrentUserService;
 import com.easylearn.easylearn.security.user.service.UserService;
 import com.easylearn.easylearn.word.repository.WordToUserRepository;
+import com.easylearn.easylearn.word.service.WordService;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Validated
@@ -36,6 +39,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryEntityConverter categoryEntityConverter;
     private final CategoryParamConverter categoryParamConverter;
+
+    private final WordService wordService;
 
     @Override
     @Transactional(readOnly = true)
@@ -69,7 +74,9 @@ public class CategoryServiceImpl implements CategoryService {
         var category = categoryParamConverter.toModel(categoryParam);
         category.setLanguage(currentUserLanguage);
         category.setUser(currentUser);
-        categoryRepository.save(categoryEntityConverter.toEntity(category));
+        var savedCategory = categoryRepository.save(categoryEntityConverter.toEntity(category));
+
+        addWordsToCategory(savedCategory, categoryParam);
 
         log.debug("Category has been created");
     }
@@ -83,7 +90,9 @@ public class CategoryServiceImpl implements CategoryService {
         validateToUpdate(categoryToUpdate, categoryParam);
 
         categoryToUpdate.setName(categoryParam.getName());
-        categoryRepository.save(categoryEntityConverter.toEntity(categoryToUpdate));
+        var savedCategory = categoryRepository.save(categoryEntityConverter.toEntity(categoryToUpdate));
+
+        addWordsToCategory(savedCategory, categoryParam);
 
         log.debug("Category has been updated");
     }
@@ -99,9 +108,19 @@ public class CategoryServiceImpl implements CategoryService {
         log.debug("Category has been deleted");
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Category> findByWordIdForCurrentUser(Long wordId) {
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+
+        return wordToUserRepository.findEntityByWordIdAndUserId(wordId, currentUser.getId())
+                .flatMap(wordToUserEntity -> Optional.ofNullable(wordToUserEntity.getCategory())
+                        .map(categoryEntityConverter::toModel));
+    }
+
     private void validatingForDuplication(CategoryParam categoryParam, Language currentUserLanguage) {
         if (categoryRepository.existsByNameAndLanguage(categoryParam.getName(), currentUserLanguage)) {
-            throw new DuplicateException("Category already exists");
+            throw new DuplicateException("Данная категория уже существует");
         }
     }
 
@@ -114,6 +133,13 @@ public class CategoryServiceImpl implements CategoryService {
     private void validateToDelete(Long id) {
         if (wordToUserRepository.existsByCategory_Id(id)) {
             throw new ServiceException("Category has words. Delete them before category deletion");
+        }
+    }
+
+    private void addWordsToCategory(CategoryEntity savedCategory, CategoryParam categoryParam) {
+        var wordIds = categoryParam.getWordIds();
+        if (CollectionUtils.isNotEmpty(wordIds)) {
+            wordIds.forEach(it -> wordService.addToCategory(it, savedCategory.getId()));
         }
     }
 }

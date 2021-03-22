@@ -199,10 +199,27 @@ public class WordServiceImpl implements WordService {
     @Override
     @Transactional(readOnly = true)
     public Collection<Word> findAllWithEmptyCategory() {
-        //TODO
-        var wordEntities = wordRepository.findAll(defaultSort);
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+
+        var spec = WordSpecMaker.makeSpecForFreeWords(currentUser.getId());
+        var wordEntities = wordRepository.findAll(spec, defaultSort);
 
         return wordEntityConverter.toModels(wordEntities);
+    }
+
+    @NotNull
+    @Override
+    @Transactional(readOnly = true)
+    public void addToCategory(@NotNull Long id, @NotNull Long categoryId) {
+        var categoryEntity = getCategoryEntity(categoryId);
+        validateWordLanguageToAddToCategory(id, categoryEntity);
+
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+
+        var wordToUserEntity = wordToUserRepository.findEntityByWordIdAndUserId(id, currentUser.getId()).orElseThrow();
+        wordToUserEntity.setCategory(categoryEntity);
+
+        wordToUserRepository.save(wordToUserEntity);
     }
 
     private PageResult<Card> convertToCard(PageResult<Word> wordPageResult) {
@@ -222,18 +239,6 @@ public class WordServiceImpl implements WordService {
                 }).collect(Collectors.toSet());
 
         return new PageResult<>(content, wordPageResult.getTotalPages(), wordPageResult.getTotalElements(), wordPageResult.getNumber());
-    }
-
-    private void addToCategory(Long id, Long categoryId) {
-        var categoryEntity = getCategoryEntity(categoryId);
-        validateWordLanguageToAddToCategory(id, categoryEntity);
-
-        var currentUser = userService.loadByUsername(currentUserService.getUsername());
-
-        var wordToUserEntity = wordToUserRepository.findEntityByWordIdAndUserId(id, currentUser.getId()).orElseThrow();
-        wordToUserEntity.setCategory(categoryEntity);
-
-        wordToUserRepository.save(wordToUserEntity);
     }
 
     public void updateCategory(Word word, WordParam wordParam) {

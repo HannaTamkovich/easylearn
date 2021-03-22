@@ -5,6 +5,7 @@ import com.easylearn.easylearn.category.model.Category;
 import com.sun.istack.NotNull;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface CategoryService {
 
@@ -19,4 +20,6 @@ public interface CategoryService {
     void update(@NotNull Long id, @NotNull CategoryParam categoryParam);
 
     void delete(@NotNull Long id);
+
+    Optional<Category> findByWordIdForCurrentUser(@NotNull Long wordId);
 }
