@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -32,7 +33,7 @@ public class WordEntityConverter {
     }
 
     @NotNull
-    public Collection<Word> toModels(@NotNull Collection<WordEntity> wordEntities) {
+    public List<Word> toModels(@NotNull Collection<WordEntity> wordEntities) {
         return wordEntities.stream().map(this::toModel).collect(Collectors.toList());
     }
 

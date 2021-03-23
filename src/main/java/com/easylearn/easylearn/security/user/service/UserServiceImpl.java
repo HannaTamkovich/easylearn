@@ -3,6 +3,7 @@ package com.easylearn.easylearn.security.user.service;
 import com.easylearn.easylearn.core.exception.DuplicateException;
 import com.easylearn.easylearn.core.exception.EntityNotFoundException;
 import com.easylearn.easylearn.security.user.dto.BaseUserParam;
+import com.easylearn.easylearn.security.user.dto.UpdateUserParam;
 import com.easylearn.easylearn.security.user.model.User;
 import com.easylearn.easylearn.security.user.repository.UserRepository;
 import com.easylearn.easylearn.security.user.repository.converter.UserEntityConverter;
@@ -10,10 +11,13 @@ import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import com.easylearn.easylearn.security.user.service.converter.UserParamConverter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
@@ -31,6 +35,8 @@ public class UserServiceImpl implements UserService {
     private final UserEntityConverter userEntityConverter;
     private final UserParamConverter userParamConverter;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Transactional(readOnly = true)
     @Override
     @NotNull
@@ -38,9 +44,9 @@ public class UserServiceImpl implements UserService {
         log.debug("Reading user: '{}'", username);
         var userEntityOpt = userRepository.findByUsernameAndDeletedFalse(username);
         return userEntityOpt.map(userEntity -> {
-            var userAccount = userEntityConverter.toModel(userEntity);
-            log.debug("User has been read: '{}'", userAccount);
-            return userAccount;
+            var user = userEntityConverter.toModel(userEntity);
+            log.debug("User has been read: '{}'", user);
+            return user;
         });
     }
 
@@ -50,9 +56,9 @@ public class UserServiceImpl implements UserService {
     public User loadByUsername(@NotNull String username) {
         log.debug("Reading user: '{}'", username);
         var userEntity = loadUserEntity(username);
-        var userAccount = userEntityConverter.toModel(userEntity);
-        log.debug("User has been read: '{}'", userAccount);
-        return userAccount;
+        var user = userEntityConverter.toModel(userEntity);
+        log.debug("User has been read: '{}'", user);
+        return user;
     }
 
     @Override
@@ -71,9 +77,9 @@ public class UserServiceImpl implements UserService {
                     log.error("User account with id '{}' not found", id);
                     throw new EntityNotFoundException(UserEntity.class.getName(), id);
                 });
-        var userAccount = userEntityConverter.toModel(userEntity);
-        log.debug("User has been read: '{}'", userAccount);
-        return userAccount;
+        var user = userEntityConverter.toModel(userEntity);
+        log.debug("User has been read: '{}'", user);
+        return user;
     }
 
     @Override
@@ -83,9 +89,9 @@ public class UserServiceImpl implements UserService {
 
         validateUserByUsername(baseUserParam);
 
-        var userAccount = userParamConverter.toModel(baseUserParam);
-        userAccount.setDateOfLastVisit(Instant.now());
-        userRepository.save(userEntityConverter.toEntity(userAccount));
+        var user = userParamConverter.toModel(baseUserParam);
+        user.setDateOfLastVisit(Instant.now());
+        userRepository.save(userEntityConverter.toEntity(user));
 
         log.debug("User has been created");
     }
@@ -99,8 +105,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void update(@NotBlank String username, @NotNull @Valid BaseUserParam baseUserParam) {
-        //TODO implementation
+    public void update(@NotBlank String username, @NotNull @Valid UpdateUserParam updateUserParam) {
+        log.info("Update user");
+
+        var user = loadByUsername(username);
+
+        validatePassword(user, updateUserParam);
+        if (!StringUtils.equals(username, updateUserParam.getUsername())) {
+            validateUserByUsername(updateUserParam);
+        }
+
+        var newUser = userParamConverter.toModel(updateUserParam);
+        var newPassword = StringUtils.isNotBlank(updateUserParam.getNewPassword()) ? passwordEncoder.encode(updateUserParam.getNewPassword()) : user.getPassword();
+        newUser.setPassword(newPassword);
+
+        userRepository.save(userEntityConverter.toEntity(newUser));
+
+        log.debug("User has been updated");
+    }
+
+    private void validatePassword(User user, UpdateUserParam updateUserParam) {
+        if (StringUtils.isBlank(updateUserParam.getPassword()) || !passwordEncoder.matches(updateUserParam.getPassword(), user.getPassword())) {
+            throw new ValidationException("Неверный пароль");
+        }
     }
 
     @Override
@@ -108,10 +135,10 @@ public class UserServiceImpl implements UserService {
     public void delete(@NotBlank String username) {
         log.info("Deleting user");
 
-        var userAccount = loadByUsername(username);
+        var user = loadByUsername(username);
 
-        userAccount.setDeleted(true);
-        userRepository.save(userEntityConverter.toEntity(userAccount));
+        user.setDeleted(true);
+        userRepository.save(userEntityConverter.toEntity(user));
 
         log.debug("User has been deleted");
     }
@@ -126,7 +153,7 @@ public class UserServiceImpl implements UserService {
 
     private void validateUserByUsername(BaseUserParam baseUserParam) {
         if (existsByUsername(baseUserParam.getUsername())) {
-            throw new DuplicateException(format("Логин ('%s') занят. Необходимо ввести другой логин", baseUserParam.getUsername()));
+            throw new DuplicateException(format("Логин ('%s') занят. Введите другой", baseUserParam.getUsername()));
         }
     }
 }

@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @AllArgsConstructor
 @Component
-public class UserAccountAuthenticationFilter extends OncePerRequestFilter {
+public class UserAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenStoreService tokenStoreService;
 
@@ -32,8 +32,8 @@ public class UserAccountAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private Optional<Authentication> findAuthentication(String token) {
-        var userAccountOpt = tokenStoreService.findByToken(token);
-        return userAccountOpt.map(userAccount -> new UsernamePasswordAuthenticationToken(userAccount, null, userAccount.getAuthorities()));
+        var userOpt = tokenStoreService.findByToken(token);
+        return userOpt.map(it -> new UsernamePasswordAuthenticationToken(it, null, it.getAuthorities()));
     }
 
 }

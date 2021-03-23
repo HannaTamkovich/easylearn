@@ -2,7 +2,7 @@ package com.easylearn.easylearn.security.user.web.controller;
 
 import com.easylearn.easylearn.core.dto.response.ErrorResponse;
 import com.easylearn.easylearn.security.service.CurrentUserService;
-import com.easylearn.easylearn.security.user.dto.BaseUserParam;
+import com.easylearn.easylearn.security.user.dto.UpdateUserParam;
 import com.easylearn.easylearn.security.user.service.UserService;
 import com.easylearn.easylearn.security.user.web.converter.UserWebConverter;
 import com.easylearn.easylearn.security.user.web.dto.UserResponse;
@@ -22,13 +22,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.websocket.server.PathParam;
 import java.util.Collection;
 
 @RestController
@@ -36,10 +34,10 @@ import java.util.Collection;
 @Validated
 @AllArgsConstructor
 @CrossOrigin
-public class UserAccountController {
+public class UserController {
 
-    private final UserService userAccountService;
-    private final UserWebConverter userAccountWebConverter;
+    private final UserService userService;
+    private final UserWebConverter userWebConverter;
     private final CurrentUserService currentUserService;
 
     @Operation(summary = "Get all users")
@@ -51,8 +49,8 @@ public class UserAccountController {
     })
     @GetMapping
     public Collection<UserResponse> findAll() {
-        var users = userAccountService.findAll();
-        return userAccountWebConverter.toResponses(users);
+        var users = userService.findAll();
+        return userWebConverter.toResponses(users);
     }
 
     @Operation(summary = "Get information about me")
@@ -65,8 +63,8 @@ public class UserAccountController {
     })
     @GetMapping("/me")
     public UserResponse me() {
-        var user = userAccountService.loadByUsername(currentUserService.getUsername());
-        return userAccountWebConverter.toResponse(user);
+        var user = userService.loadByUsername(currentUserService.getUsername());
+        return userWebConverter.toResponse(user);
     }
 
     @Operation(summary = "Get user by id")
@@ -80,8 +78,8 @@ public class UserAccountController {
     })
     @GetMapping("/{username}")
     public UserResponse read(@NotNull @PathVariable String username) {
-        var user = userAccountService.loadByUsername(username);
-        return userAccountWebConverter.toResponse(user);
+        var user = userService.loadByUsername(username);
+        return userWebConverter.toResponse(user);
     }
 
     @Operation(summary = "Update user")
@@ -94,8 +92,8 @@ public class UserAccountController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/{username}")
-    public void update(@NotNull @PathVariable String username, @Valid @NotNull @RequestBody BaseUserParam baseUserParam) {
-        userAccountService.update(username, baseUserParam);
+    public void update(@NotNull @PathVariable String username, @Valid @NotNull @RequestBody UpdateUserParam updateUserParam) {
+        userService.update(username, updateUserParam);
     }
 
     @Operation(summary = "Update user")
@@ -109,6 +107,6 @@ public class UserAccountController {
     })
     @DeleteMapping("/{username}")
     public void update(@NotBlank @PathVariable String username) {
-        userAccountService.delete(username);
+        userService.delete(username);
     }
 }

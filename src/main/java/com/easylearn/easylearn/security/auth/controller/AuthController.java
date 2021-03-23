@@ -51,7 +51,7 @@ public class AuthController {
     @Operation(summary = "Sign up")
     @ApiResponse(responseCode = "200", description = "Ok", content = @Content())
     @PostMapping(SIGN_UP_PATH)
-    public void createUserAccount(@Valid @NotNull @RequestBody BaseUserParam baseUserParam) {
+    public void createUser(@Valid @NotNull @RequestBody BaseUserParam baseUserParam) {
         baseUserParam.setPassword(passwordEncoder.encode(baseUserParam.getPassword()));
         userService.create(baseUserParam);
     }

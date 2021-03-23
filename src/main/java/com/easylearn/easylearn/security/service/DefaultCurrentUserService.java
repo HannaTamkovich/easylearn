@@ -10,14 +10,14 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class DefaultCurrentUserService implements CurrentUserService {
 
-    private final UserInfoAccountProvider userAccountProvider;
+    private final UserInfoProvider userProvider;
     private final LoginStatusProvider loginStatusProvider;
 
     @Override
     public String getUsername() {
         checkUserIsLoggedIn();
 
-        return userAccountProvider.getUserAccount().getUsername();
+        return userProvider.getUser().getUsername();
     }
 
     @Override
@@ -29,7 +29,7 @@ public class DefaultCurrentUserService implements CurrentUserService {
     public Language getLanguage() {
         checkUserIsLoggedIn();
 
-        return userAccountProvider.getUserAccount().getLanguage();
+        return userProvider.getUser().getLanguage();
     }
 
     private void checkUserIsLoggedIn() {

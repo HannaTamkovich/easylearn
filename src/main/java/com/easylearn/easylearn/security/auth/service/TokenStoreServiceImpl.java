@@ -34,15 +34,15 @@ public class TokenStoreServiceImpl implements TokenStoreService {
     @Override
     @NotNull
     public String create(@Valid @NotNull LoginParam loginParam) {
-        var userAccountOpt = userService.findByUsernameAndActiveStatus(loginParam.getUsername());
-        validateUsernameAndPassword(userAccountOpt, loginParam.getPassword());
+        var userOpt = userService.findByUsernameAndActiveStatus(loginParam.getUsername());
+        validateUsernameAndPassword(userOpt, loginParam.getPassword());
         var token = "Bearer " + UUID.randomUUID().toString();
-        tokenUsernameMap.put(token, userAccountOpt.orElseThrow().getUsername());
+        tokenUsernameMap.put(token, userOpt.orElseThrow().getUsername());
         return token;
     }
 
-    private void validateUsernameAndPassword(Optional<User> userAccount, String password) {
-        userAccount
+    private void validateUsernameAndPassword(Optional<User> user, String password) {
+        user
                 .ifPresentOrElse(account -> {
                     if (!passwordEncoder.matches(password, account.getPassword())) {
                         throw new BadCredentialsException("Неверный логин и/или пароль.");

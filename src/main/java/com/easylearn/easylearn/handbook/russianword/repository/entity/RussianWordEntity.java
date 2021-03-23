@@ -2,6 +2,7 @@ package com.easylearn.easylearn.handbook.russianword.repository.entity;
 
 import com.easylearn.easylearn.language.model.Language;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -24,6 +25,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "russian_word")
+@Builder
 public class RussianWordEntity implements Serializable {
 
     @Serial
@@ -36,19 +38,4 @@ public class RussianWordEntity implements Serializable {
 
     @NotNull
     private String word;
-
-    @NotNull
-    private String code;
-
-    @NotNull
-    private String code_parent;
-
-    @NotNull
-    private String gender;
-
-    @NotNull
-    private String wcase;
-
-    @NotNull
-    private String soul;
 }

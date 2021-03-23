@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface RussianWordRepository extends JpaRepository<RussianWordEntity, Long> {
 
-    @Query(value = "SELECT * FROM RUSSIAN_WORD r ORDER BY RAND() LIMIT 1", nativeQuery = true)
-    RussianWordEntity findRussianWord();
+    @Query(value = "SELECT * FROM RUSSIAN_WORD r WHERE r.WORD NOT LIKE ?1 ORDER BY RAND() LIMIT 1", nativeQuery = true)
+    RussianWordEntity findRussianWord(String translation);
+
+    boolean existsByWord(String word);
 }

@@ -1,6 +1,7 @@
 package com.easylearn.easylearn.security.user.service;
 
 import com.easylearn.easylearn.security.user.dto.BaseUserParam;
+import com.easylearn.easylearn.security.user.dto.UpdateUserParam;
 import com.easylearn.easylearn.security.user.model.User;
 
 import javax.validation.Valid;
@@ -27,7 +28,7 @@ public interface UserService {
     @NotNull
     Collection<User> findAll();
 
-    void update(@NotBlank String username, @NotNull @Valid BaseUserParam baseUserParam);
+    void update(@NotBlank String username, @NotNull @Valid UpdateUserParam updateUserParam);
 
     void delete(@NotBlank String username);
 }

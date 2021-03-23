@@ -1,6 +1,6 @@
 package com.easylearn.easylearn.security.config;
 
-import com.easylearn.easylearn.security.auth.filter.UserAccountAuthenticationFilter;
+import com.easylearn.easylearn.security.auth.filter.UserAuthenticationFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,7 +16,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @AllArgsConstructor
 public class LocalWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final UserAccountAuthenticationFilter authenticationFilter;
+    private final UserAuthenticationFilter authenticationFilter;
 
     @Override
     public void configure(WebSecurity web) {

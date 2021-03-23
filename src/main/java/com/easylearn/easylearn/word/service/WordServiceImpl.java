@@ -7,6 +7,7 @@ import com.easylearn.easylearn.core.exception.DuplicateException;
 import com.easylearn.easylearn.core.exception.EntityNotFoundException;
 import com.easylearn.easylearn.core.exception.ServiceException;
 import com.easylearn.easylearn.handbook.russianword.repository.RussianWordRepository;
+import com.easylearn.easylearn.handbook.russianword.repository.entity.RussianWordEntity;
 import com.easylearn.easylearn.security.service.CurrentUserService;
 import com.easylearn.easylearn.security.user.model.User;
 import com.easylearn.easylearn.security.user.service.UserService;
@@ -28,18 +29,22 @@ import com.easylearn.easylearn.word.service.converter.WordParamConverter;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotBlank;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -91,20 +96,19 @@ public class WordServiceImpl implements WordService {
     public PageResult<Card> findAllCards(@NotNull CardFilter cardFilter) {
         log.info("Find cards by filter");
 
-        var pagination = PageRequest.of(cardFilter.getPageNumber(), cardFilter.getPageSize());
-
-        //TODO sort by date
         var userId = cardFilter.isOnlyUserWords() ? userService.loadByUsername(currentUserService.getUsername()).getId() : null;
         var spec = CardSpecMaker.makeSpec(userId);
-        var wordEntities = wordRepository.findAll(spec, pagination);
-        var words = wordEntityConverter.toModel(wordEntities);
+        var wordEntities = wordRepository.findAll(spec);
+        var words = wordEntityConverter.toModels(wordEntities).stream()
+                .collect(Collectors.toMap(Word::getId, Function.identity()));
 
-        //TODO
         var wordToUserEntities = Optional.ofNullable(userId)
                 .map(wordToUserRepository::findAllByUserIdOrderByDateOfLastAnswerAsc)
-                .orElseGet(() -> wordToUserRepository.findAll(defaultSort));
+                .orElseGet(() -> wordToUserRepository.findAll(defaultSortUserWords));
 
-        return convertToCard(words);
+        var sortedWords = wordToUserEntities.stream().map(it -> words.get(it.getId())).collect(Collectors.toList());
+
+        return convertToCard(sortedWords, cardFilter);
     }
 
     @Override
@@ -117,7 +121,9 @@ public class WordServiceImpl implements WordService {
                 .orElseGet(() -> {
                     var word = wordParamConverter.toModel(wordParam);
                     word.setLanguage(userLanguage);
-                    return wordRepository.save(wordEntityConverter.toEntity(word));
+                    var savedWord = wordRepository.save(wordEntityConverter.toEntity(word));
+                    addWordToDictionary(savedWord);
+                    return savedWord;
                 });
 
         addToMyWords(wordEntity.getId());
@@ -179,16 +185,17 @@ public class WordServiceImpl implements WordService {
     public boolean answer(@NotNull Long id, @NotBlank String selectedValue) {
         log.info("Answer word {}", id);
 
-        /*var currentUser = userAccountService.loadByUsername(currentUserService.getUsername());
-        var wordToUserEntity = wordToUserRepository.findByWordIdAndUserId(id, currentUser.getId()).orElseThrow();
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+        var wordToUserEntity = wordToUserRepository.findByWordIdAndUserId(id, currentUser.getId());
+        var word = findById(id);
 
-        if (isCorrectAnswer) {
+        if (StringUtils.equals(word.getTranslation(), selectedValue)) {
             wordToUserEntity.setNumberOfCorrectAnswers(wordToUserEntity.getNumberOfCorrectAnswers() + 1);
         }
         wordToUserEntity.setNumberOfAnswers(wordToUserEntity.getNumberOfAnswers() + 1);
         wordToUserEntity.setDateOfLastAnswer(Instant.now());
 
-        wordToUserRepository.save(wordToUserEntity);*/
+        wordToUserRepository.save(wordToUserEntity);
 
         log.debug("Word has been answered");
         return true;
@@ -222,13 +229,13 @@ public class WordServiceImpl implements WordService {
         wordToUserRepository.save(wordToUserEntity);
     }
 
-    private PageResult<Card> convertToCard(PageResult<Word> wordPageResult) {
-        var content = wordPageResult.getContent().stream()
+    private PageResult<Card> convertToCard(List<Word> words, CardFilter cardFilter) {
+        var content = words.stream()
                 .map(it -> {
                     var randomWords = Set.of(
-                            russianWordRepository.findRussianWord().getWord().toLowerCase(),
-                            russianWordRepository.findRussianWord().getWord().toLowerCase(),
-                            russianWordRepository.findRussianWord().getWord().toLowerCase(),
+                            russianWordRepository.findRussianWord(it.getTranslation()).getWord().toLowerCase(),
+                            russianWordRepository.findRussianWord(it.getTranslation()).getWord().toLowerCase(),
+                            russianWordRepository.findRussianWord(it.getTranslation()).getWord().toLowerCase(),
                             it.getTranslation().toLowerCase()
                     );
                     return Card.builder()
@@ -238,7 +245,18 @@ public class WordServiceImpl implements WordService {
                             .build();
                 }).collect(Collectors.toSet());
 
-        return new PageResult<>(content, wordPageResult.getTotalPages(), wordPageResult.getTotalElements(), wordPageResult.getNumber());
+        var pageNumber = cardFilter.getPageNumber();
+        var pageSize = cardFilter.getPageSize();
+        var totalElements = words.size();
+        var totalPages = BigDecimal.valueOf(totalElements).divide(BigDecimal.valueOf(pageSize), RoundingMode.UP).toBigInteger().intValue();
+
+        return new PageResult<>(content, totalPages, totalElements, pageNumber);
+    }
+
+    private void addWordToDictionary(WordEntity savedWord) {
+        if (!russianWordRepository.existsByWord(savedWord.getTranslation())) {
+            russianWordRepository.save(RussianWordEntity.builder().word(savedWord.getWord()).build());
+        }
     }
 
     public void updateCategory(Word word, WordParam wordParam) {

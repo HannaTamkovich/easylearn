@@ -22,8 +22,8 @@ public class AuditConfig {
     @Bean
     public AuditorAware<UserEntity> auditorAware() {
         return () -> {
-            var userAccount = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return Optional.of(userEntityConverter.toEntity(userAccount));
+            var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return Optional.of(userEntityConverter.toEntity(user));
         };
     }
 

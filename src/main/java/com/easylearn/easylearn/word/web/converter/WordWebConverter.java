@@ -32,6 +32,16 @@ public class WordWebConverter {
         return wordResponse;
     }
 
+    @NotNull
+    public Collection<WordResponse> toEmptyResponses(@NotNull Collection<Word> words) {
+        return words.stream().map(this::toEmptyResponse).collect(Collectors.toList());
+    }
+
+    @NotNull
+    public WordResponse toEmptyResponse(@NotNull Word word) {
+        return modelMapper.map(word, WordResponse.class);
+    }
+
     private CategoryResponse getCategoryResponse(Long wordId) {
         return categoryService.findByWordIdForCurrentUser(wordId)
                 .map(it -> modelMapper.map(it, CategoryResponse.class))

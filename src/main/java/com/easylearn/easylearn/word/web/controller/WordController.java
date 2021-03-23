@@ -80,7 +80,6 @@ public class WordController {
     })
     @GetMapping(WORD_PATH)
     public Collection<WordResponse> findAll(@NotNull @Valid WordFilter wordFilter) {
-        //TODO  добавить категорию в респонс
         var words = wordService.findAll(wordFilter);
         return wordWebConverter.toResponses(words);
     }
@@ -176,9 +175,8 @@ public class WordController {
     })
     @GetMapping(PATH_EMPTY_CATEGORY)
     public Collection<WordResponse> findAllWithEmptyCategory() {
-        //TODO  добавить категорию в респонс
         var words = wordService.findAllWithEmptyCategory();
-        return wordWebConverter.toResponses(words);
+        return wordWebConverter.toEmptyResponses(words);
     }
 
 }
