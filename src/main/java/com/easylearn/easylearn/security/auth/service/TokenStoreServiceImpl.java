@@ -47,6 +47,7 @@ public class TokenStoreServiceImpl implements TokenStoreService {
                     if (!passwordEncoder.matches(password, account.getPassword())) {
                         throw new BadCredentialsException("Неверный логин и/или пароль.");
                     }
+                    userService.login(account);
                 }, () -> {
                     throw new UsernameNotFoundException("Неверный логин и/или пароль.");
                 });

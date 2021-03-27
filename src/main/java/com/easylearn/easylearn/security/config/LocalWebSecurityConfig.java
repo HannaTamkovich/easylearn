@@ -2,7 +2,6 @@ package com.easylearn.easylearn.security.config;
 
 import com.easylearn.easylearn.security.auth.filter.UserAuthenticationFilter;
 import lombok.AllArgsConstructor;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,7 +10,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
-@Profile("local")
 @EnableWebSecurity
 @AllArgsConstructor
 public class LocalWebSecurityConfig extends WebSecurityConfigurerAdapter {

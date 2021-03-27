@@ -1,6 +1,5 @@
 package com.easylearn.easylearn.word.web.dto;
 
-import com.easylearn.easylearn.category.web.dto.DefaultCategoryResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class WordResponse extends DefaultWordResponse {
+public class DefaultWordResponse {
 
-    private DefaultCategoryResponse category;
+    private Long id;
+    private String word;
+    private String translation;
 }

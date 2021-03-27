@@ -115,19 +115,12 @@ public class UserServiceImpl implements UserService {
             validateUserByUsername(updateUserParam);
         }
 
-        var newUser = userParamConverter.toModel(updateUserParam);
-        var newPassword = StringUtils.isNotBlank(updateUserParam.getNewPassword()) ? passwordEncoder.encode(updateUserParam.getNewPassword()) : user.getPassword();
-        newUser.setPassword(newPassword);
+        userParamConverter.toUpdatedModel(updateUserParam, user);
+        updatePassword(updateUserParam, user);
 
-        userRepository.save(userEntityConverter.toEntity(newUser));
+        userRepository.save(userEntityConverter.toEntity(user));
 
         log.debug("User has been updated");
-    }
-
-    private void validatePassword(User user, UpdateUserParam updateUserParam) {
-        if (StringUtils.isBlank(updateUserParam.getPassword()) || !passwordEncoder.matches(updateUserParam.getPassword(), user.getPassword())) {
-            throw new ValidationException("Неверный пароль");
-        }
     }
 
     @Override
@@ -143,6 +136,15 @@ public class UserServiceImpl implements UserService {
         log.debug("User has been deleted");
     }
 
+    @Override
+    @Transactional
+    public void login(@NotNull @Valid User user) {
+        log.info("Set login date");
+
+        user.setDateOfLastVisit(Instant.now());
+        userRepository.save(userEntityConverter.toEntity(user));
+    }
+
     private UserEntity loadUserEntity(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> {
@@ -155,5 +157,17 @@ public class UserServiceImpl implements UserService {
         if (existsByUsername(baseUserParam.getUsername())) {
             throw new DuplicateException(format("Логин ('%s') занят. Введите другой", baseUserParam.getUsername()));
         }
+    }
+
+    private void validatePassword(User user, UpdateUserParam updateUserParam) {
+        if (StringUtils.isBlank(updateUserParam.getPassword()) || !passwordEncoder.matches(updateUserParam.getPassword(), user.getPassword())) {
+            throw new ValidationException("Неверный пароль");
+        }
+    }
+
+    private void updatePassword(UpdateUserParam updateUserParam, User user) {
+        var newPassword = StringUtils.isNotBlank(updateUserParam.getNewPassword()) ?
+                passwordEncoder.encode(updateUserParam.getNewPassword()) : passwordEncoder.encode(user.getPassword());
+        user.setPassword(newPassword);
     }
 }

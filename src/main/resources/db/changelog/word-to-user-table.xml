@@ -11,7 +11,7 @@
 
     <changeSet author="abudai" id="word-to-user-table">
         <createTable tableName="word_to_user">
-            <column name="id" type="BIGINT" defaultValueComputed="word_to_user_sequence.nextval">
+            <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="word_to_user_sequence_pkey"/>
             </column>
             <column name="word_id" type="BIGINT"/>

@@ -3,11 +3,8 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-    <changeSet id="abudai" author="detection-method-dictionary">
-        <sqlFile path="db/dictionaries/words-russian-nouns.sql"/>
-        <!--        <sqlFile path="db/dictionaries/words-russian-fullbase.sql"/>-->
-        <!--        <sqlFile path="db/dictionaries/words-russian-fullbase-part2.sql"/>-->
-        <!--        <sqlFile path="db/dictionaries/words-russian-fullbase-part3.sql"/>-->
+    <changeSet author="abudai" id="dictionary">
+        <sqlFile path="db/dictionaries/schedule_public_russian_word.sql"/>
     </changeSet>
 
 </databaseChangeLog>

@@ -12,6 +12,7 @@ import com.easylearn.easylearn.core.exception.ServiceException;
 import com.easylearn.easylearn.language.model.Language;
 import com.easylearn.easylearn.security.service.CurrentUserService;
 import com.easylearn.easylearn.security.user.service.UserService;
+import com.easylearn.easylearn.word.model.Word;
 import com.easylearn.easylearn.word.repository.WordToUserRepository;
 import com.easylearn.easylearn.word.service.WordService;
 import com.sun.istack.NotNull;
@@ -24,6 +25,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Validated
@@ -138,8 +140,21 @@ public class CategoryServiceImpl implements CategoryService {
 
     private void addWordsToCategory(CategoryEntity savedCategory, CategoryParam categoryParam) {
         var wordIds = categoryParam.getWordIds();
-        if (CollectionUtils.isNotEmpty(wordIds)) {
-            wordIds.forEach(it -> wordService.addToCategory(it, savedCategory.getId()));
+
+        var existedWordIds = wordService.findAllByCategory(savedCategory.getId()).stream()
+                .map(Word::getId).collect(Collectors.toSet());
+
+        if (!CollectionUtils.isEqualCollection(existedWordIds, wordIds)) {
+            wordIds.forEach(it -> {
+                if (!existedWordIds.contains(it)) {
+                    wordService.addToCategory(it, savedCategory.getId());
+                }
+            });
+            existedWordIds.forEach(it -> {
+                if (!wordIds.contains(it)) {
+                    wordService.deleteFromCategory(it, savedCategory.getId());
+                }
+            });
         }
     }
 }

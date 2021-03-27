@@ -4,6 +4,7 @@ import com.easylearn.easylearn.category.dto.CategoryParam;
 import com.easylearn.easylearn.category.service.CategoryService;
 import com.easylearn.easylearn.category.web.converter.CategoryWebConverter;
 import com.easylearn.easylearn.category.web.dto.CategoryResponse;
+import com.easylearn.easylearn.category.web.dto.DefaultCategoryResponse;
 import com.easylearn.easylearn.core.dto.response.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,9 +37,44 @@ public class CategoryController {
 
     public static final String CATEGORY_PATH = "/categories";
     public static final String PATH_BY_ID = "/{id}";
+    public static final String PATH_TO_UPDATE = "/{id}/details";
 
     private final CategoryService categoryService;
     private final CategoryWebConverter categoryWebConverter;
+
+    @Operation(summary = "Get category by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DefaultCategoryResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Not found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    @GetMapping(PATH_BY_ID)
+    public DefaultCategoryResponse findById(@NotNull @PathVariable("id") Long id) {
+        var category = categoryService.findById(id);
+        return categoryWebConverter.toResponse(category);
+    }
+
+    @Operation(summary = "Get all categories")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DefaultCategoryResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Not found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    @GetMapping
+    public Collection<DefaultCategoryResponse> findAllForCurrentUser() {
+        var categories = categoryService.findAllForCurrentUser();
+        return categoryWebConverter.toDefaultResponses(categories);
+    }
 
     @Operation(summary = "Get category by id")
     @ApiResponses(value = {
@@ -51,27 +87,10 @@ public class CategoryController {
             @ApiResponse(responseCode = "404", description = "Not found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
     })
-    @GetMapping(PATH_BY_ID)
-    public CategoryResponse findById(@NotNull @PathVariable("id") Long id) {
+    @GetMapping(PATH_TO_UPDATE)
+    public CategoryResponse findToUpdate(@NotNull @PathVariable("id") Long id) {
         var category = categoryService.findById(id);
-        return categoryWebConverter.toResponse(category);
-    }
-
-    @Operation(summary = "Get all categories")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CategoryResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
-    @GetMapping
-    public Collection<CategoryResponse> findAllForCurrentUser() {
-        var categories = categoryService.findAllForCurrentUser();
-        return categoryWebConverter.toResponses(categories);
+        return categoryWebConverter.toUpdateResponse(category);
     }
 
     @Operation(summary = "Create category")

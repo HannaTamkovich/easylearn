@@ -16,7 +16,6 @@ import com.easylearn.easylearn.word.repository.entity.WordToUserEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,6 @@ import java.util.List;
 @Transactional
 @Component
 @RequiredArgsConstructor
-@Profile("local")
 @Slf4j
 public class MockDataCreator {
 
@@ -50,9 +48,9 @@ public class MockDataCreator {
     public void createMockData() {
         log.info("Create mock data for local env");
 
-        createUsers();
-        createWords();
-        createCategories();
+        //createUsers();
+        //createWords();
+        //createCategories();
     }
 
     private void createWords() {

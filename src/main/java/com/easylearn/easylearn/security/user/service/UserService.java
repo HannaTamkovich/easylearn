@@ -31,4 +31,6 @@ public interface UserService {
     void update(@NotBlank String username, @NotNull @Valid UpdateUserParam updateUserParam);
 
     void delete(@NotBlank String username);
+
+    void login(@NotNull @Valid User user);
 }

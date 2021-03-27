@@ -91,6 +91,15 @@ public class WordServiceImpl implements WordService {
     }
 
     @Override
+    public Collection<Word> findAllByCategory(Long categoryId) {
+        log.info("Find word by categoryId {}", categoryId);
+
+        var filter = new WordFilter(categoryId, currentUserService.getUsername());
+
+        return findAll(filter);
+    }
+
+    @Override
     @NotNull
     @Transactional(readOnly = true)
     public PageResult<Card> findAllCards(@NotNull CardFilter cardFilter) {
@@ -189,7 +198,9 @@ public class WordServiceImpl implements WordService {
         var wordToUserEntity = wordToUserRepository.findByWordIdAndUserId(id, currentUser.getId());
         var word = findById(id);
 
-        if (StringUtils.equals(word.getTranslation(), selectedValue)) {
+        var isCorrectTranslation = StringUtils.equalsIgnoreCase(word.getTranslation(), selectedValue);
+
+        if (isCorrectTranslation) {
             wordToUserEntity.setNumberOfCorrectAnswers(wordToUserEntity.getNumberOfCorrectAnswers() + 1);
         }
         wordToUserEntity.setNumberOfAnswers(wordToUserEntity.getNumberOfAnswers() + 1);
@@ -198,8 +209,8 @@ public class WordServiceImpl implements WordService {
         wordToUserRepository.save(wordToUserEntity);
 
         log.debug("Word has been answered");
-        return true;
 
+        return isCorrectTranslation;
     }
 
     @NotNull
@@ -214,9 +225,8 @@ public class WordServiceImpl implements WordService {
         return wordEntityConverter.toModels(wordEntities);
     }
 
-    @NotNull
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public void addToCategory(@NotNull Long id, @NotNull Long categoryId) {
         var categoryEntity = getCategoryEntity(categoryId);
         validateWordLanguageToAddToCategory(id, categoryEntity);
@@ -227,6 +237,16 @@ public class WordServiceImpl implements WordService {
         wordToUserEntity.setCategory(categoryEntity);
 
         wordToUserRepository.save(wordToUserEntity);
+    }
+
+    @Override
+    @Transactional
+    public void deleteFromCategory(@NotNull Long id, @NotNull Long categoryId) {
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+        var wordToUserEntity = wordToUserRepository.
+                findEntityByWordIdAndUserIdAndCategory_Id(id, currentUser.getId(), categoryId).orElseThrow();
+
+        removeFromCategory(wordToUserEntity);
     }
 
     private PageResult<Card> convertToCard(List<Word> words, CardFilter cardFilter) {

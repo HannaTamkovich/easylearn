@@ -20,6 +20,9 @@ public interface WordService {
     Collection<Word> findAll(@NotNull WordFilter wordFilter);
 
     @NotNull
+    Collection<Word> findAllByCategory(@NotNull Long categoryId);
+
+    @NotNull
     PageResult<Card> findAllCards(@NotNull CardFilter wordFilter);
 
     void create(@NotNull WordParam wordParam);
@@ -35,4 +38,6 @@ public interface WordService {
     Collection<Word> findAllWithEmptyCategory();
 
     void addToCategory(@NotNull Long id, @NotNull Long categoryId);
+
+    void deleteFromCategory(@NotNull Long id, @NotNull Long categoryId);
 }

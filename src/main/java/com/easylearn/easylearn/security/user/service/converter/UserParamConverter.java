@@ -18,4 +18,8 @@ public class UserParamConverter {
     public User toModel(BaseUserParam baseUserParam) {
         return modelMapper.map(baseUserParam, User.class);
     }
+
+    public void toUpdatedModel(BaseUserParam baseUserParam, User user) {
+        modelMapper.map(baseUserParam, user);
+    }
 }

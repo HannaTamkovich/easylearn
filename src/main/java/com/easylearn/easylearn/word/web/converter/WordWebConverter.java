@@ -1,7 +1,7 @@
 package com.easylearn.easylearn.word.web.converter;
 
 import com.easylearn.easylearn.category.service.CategoryService;
-import com.easylearn.easylearn.category.web.dto.CategoryResponse;
+import com.easylearn.easylearn.category.web.dto.DefaultCategoryResponse;
 import com.easylearn.easylearn.word.model.Word;
 import com.easylearn.easylearn.word.web.dto.WordResponse;
 import lombok.AllArgsConstructor;
@@ -42,9 +42,9 @@ public class WordWebConverter {
         return modelMapper.map(word, WordResponse.class);
     }
 
-    private CategoryResponse getCategoryResponse(Long wordId) {
+    private DefaultCategoryResponse getCategoryResponse(Long wordId) {
         return categoryService.findByWordIdForCurrentUser(wordId)
-                .map(it -> modelMapper.map(it, CategoryResponse.class))
+                .map(it -> modelMapper.map(it, DefaultCategoryResponse.class))
                 .orElse(null);
     }
 }

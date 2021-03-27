@@ -20,6 +20,8 @@ public interface WordToUserRepository extends JpaRepository<WordToUserEntity, Lo
 
     Optional<WordToUserEntity> findEntityByWordIdAndUserId(Long wordId, Long userId);
 
+    Optional<WordToUserEntity> findEntityByWordIdAndUserIdAndCategory_Id(Long wordId, Long userId, Long categoryId);
+
     WordToUserEntity findByWordIdAndUserId(Long wordId, Long userId);
 
     List<WordToUserEntity> findAllByUserIdOrderByDateOfLastAnswerAsc(Long userId);

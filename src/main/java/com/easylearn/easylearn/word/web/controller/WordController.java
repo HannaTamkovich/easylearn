@@ -1,6 +1,5 @@
 package com.easylearn.easylearn.word.web.controller;
 
-import com.easylearn.easylearn.category.web.dto.CategoryResponse;
 import com.easylearn.easylearn.core.dto.response.ErrorResponse;
 import com.easylearn.easylearn.core.dto.response.PageResult;
 import com.easylearn.easylearn.word.dto.CardFilter;
@@ -45,6 +44,9 @@ public class WordController {
     public static final String PATH_BY_ID = WORD_PATH + "/{id}";
     public static final String PATH_ANSWER = WORD_PATH + "/{id}/answer";
     public static final String PATH_EMPTY_CATEGORY = WORD_PATH + "/empty-category";
+    public static final String PATH_REMOVE_FROM_CATEGORY = WORD_PATH + "/{id}/remove-from-category/{categoryId}";
+
+    //TODO add to my words
 
     private final WordService wordService;
     private final WordWebConverter wordWebConverter;
@@ -87,7 +89,7 @@ public class WordController {
     @Operation(summary = "Get all cards")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CategoryResponse.class))),
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CardResponse.class))),
             @ApiResponse(responseCode = "400", description = "Bad request",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden",
@@ -179,4 +181,19 @@ public class WordController {
         return wordWebConverter.toEmptyResponses(words);
     }
 
+    @Operation(summary = "Delete category by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Not found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    @DeleteMapping(PATH_REMOVE_FROM_CATEGORY)
+    public void deleteFromCategory(@NotNull @PathVariable("id") Long id, @NotNull @PathVariable("categoryId") Long categoryId) {
+        wordService.deleteFromCategory(id, categoryId);
+    }
 }

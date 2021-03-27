@@ -1,6 +1,5 @@
 package com.easylearn.easylearn.security.user.dto;
 
-import com.easylearn.easylearn.language.model.Language;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,5 +41,6 @@ public class BaseUserParam {
     @NotBlank
     private String password;
 
-    private Language language;
+    @NotNull
+    private String language;
 }

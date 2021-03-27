@@ -11,23 +11,18 @@ spring:
   liquibase:
     change-log: classpath:/db/db.changelog-master.xml
   datasource:
-    url: jdbc:h2:mem:easylearndb;INIT=CREATE SCHEMA IF NOT EXISTS EASY_LEARN;DB_CLOSE_DELAY=-1
-    driverClassName: org.h2.Driver
+    url: jdbc:postgresql://localhost:5432/EASY_LEARN
+    driverClassName: org.postgresql.Driver
     hikari:
-      schema: EASY_LEARN
-  h2:
-    console:
-      enabled: true
-      settings:
-        web-allow-others: true
+      schema: easy_learn
+    username: postgres
+    password: admin
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: validate
-  cache:
-    type: simple
+      ddl-auto: update
+    show-sql: true
 
 logging:
   level:
-    com.severstal: debug
+    com.easylearn: debug
     org.hibernate.SQL: debug
