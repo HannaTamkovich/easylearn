@@ -2,6 +2,7 @@ package com.easylearn.easylearn.security.user.service;
 
 import com.easylearn.easylearn.core.exception.DuplicateException;
 import com.easylearn.easylearn.core.exception.EntityNotFoundException;
+import com.easylearn.easylearn.email.MailSenderService;
 import com.easylearn.easylearn.security.user.dto.BaseUserParam;
 import com.easylearn.easylearn.security.user.dto.UpdateUserParam;
 import com.easylearn.easylearn.security.user.model.User;
@@ -9,6 +10,7 @@ import com.easylearn.easylearn.security.user.repository.UserRepository;
 import com.easylearn.easylearn.security.user.repository.converter.UserEntityConverter;
 import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import com.easylearn.easylearn.security.user.service.converter.UserParamConverter;
+import com.easylearn.easylearn.security.useractivation.service.UserActivationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +38,9 @@ public class UserServiceImpl implements UserService {
     private final UserParamConverter userParamConverter;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final UserActivationService userActivationService;
+    private final MailSenderService mailSenderService;
 
     @Transactional(readOnly = true)
     @Override
@@ -89,9 +94,13 @@ public class UserServiceImpl implements UserService {
 
         validateUserByUsername(baseUserParam);
 
-        var user = userParamConverter.toModel(baseUserParam);
-        user.setDateOfLastVisit(Instant.now());
-        userRepository.save(userEntityConverter.toEntity(user));
+        var userToSave = userParamConverter.toModel(baseUserParam);
+        userToSave.setDateOfLastVisit(Instant.now());
+        var savedUser = userRepository.save(userEntityConverter.toEntity(userToSave));
+
+        var user = userEntityConverter.toModel(savedUser);
+        userActivationService.generateCode(user);
+        mailSenderService.sendVerificationMessage(user);
 
         log.debug("User has been created");
     }
@@ -118,7 +127,12 @@ public class UserServiceImpl implements UserService {
         userParamConverter.toUpdatedModel(updateUserParam, user);
         updatePassword(updateUserParam, user);
 
-        userRepository.save(userEntityConverter.toEntity(user));
+        var savedUser = userRepository.save(userEntityConverter.toEntity(user));
+
+        if (StringUtils.equals(user.getEmail(), savedUser.getEmail())) {
+            userActivationService.generateCode(user);
+            mailSenderService.sendVerificationMessage(user);
+        }
 
         log.debug("User has been updated");
     }

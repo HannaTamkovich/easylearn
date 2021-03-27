@@ -22,6 +22,7 @@ public class LocalWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 "/login",
                 "/logout",
                 "/sign-up",
+                "/activate/**",
                 "/swagger-ui/**",
                 "/upload-data",
                 "v3/api-docs/**");
@@ -34,6 +35,7 @@ public class LocalWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests().antMatchers("/").permitAll().and()
                 .authorizeRequests().antMatchers("/h2-console/**").permitAll().and()
+                .authorizeRequests().antMatchers("/activate/**").permitAll().and()
                 .authorizeRequests().antMatchers("/sign-up").permitAll()
                 .anyRequest().authenticated()
                 .and()

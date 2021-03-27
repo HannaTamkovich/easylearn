@@ -6,8 +6,6 @@ server:
   port: ${PORT:8080}
 
 spring:
-  profiles:
-    active: local
   liquibase:
     change-log: classpath:/db/db.changelog-master.xml
   datasource:

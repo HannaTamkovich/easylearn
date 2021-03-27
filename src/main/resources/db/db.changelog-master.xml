@@ -9,5 +9,6 @@
     <include file="db/changelog/word-to-user-table.xml"/>
     <include file="db/changelog/russian-words-table.xml"/>
     <include file="db/changelog/detection-method-dictionary-data.xml"/>
+    <include file="db/changelog/user-activation-table.xml"/>
 
 </databaseChangeLog>

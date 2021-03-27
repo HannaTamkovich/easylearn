@@ -3,6 +3,7 @@ package com.easylearn.easylearn.security.auth.service;
 import com.easylearn.easylearn.security.auth.dto.LoginParam;
 import com.easylearn.easylearn.security.user.model.User;
 import com.easylearn.easylearn.security.user.service.UserService;
+import com.easylearn.easylearn.security.useractivation.repository.UserActivationRepository;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,8 @@ public class TokenStoreServiceImpl implements TokenStoreService {
 
     private static final int TOKEN_EXPIRATION_IN_MINUTES = 60;
 
+    private final UserActivationRepository userActivationRepository;
+
     private final UserService userService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final Cache<String, String> tokenUsernameMap = CacheBuilder.newBuilder().expireAfterAccess(Duration.ofMinutes(TOKEN_EXPIRATION_IN_MINUTES)).build();
@@ -46,6 +49,9 @@ public class TokenStoreServiceImpl implements TokenStoreService {
                 .ifPresentOrElse(account -> {
                     if (!passwordEncoder.matches(password, account.getPassword())) {
                         throw new BadCredentialsException("Неверный логин и/или пароль.");
+                    }
+                    if (userActivationRepository.existsByUser_Username(account.getUsername())) {
+                        throw new BadCredentialsException("Необходимо верифицировать аккаунт. Проверьте почту.");
                     }
                     userService.login(account);
                 }, () -> {

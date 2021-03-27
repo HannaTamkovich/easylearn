@@ -106,7 +106,7 @@ public class UserController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping("/{username}")
-    public void update(@NotBlank @PathVariable String username) {
+    public void delete(@NotBlank @PathVariable String username) {
         userService.delete(username);
     }
 }
