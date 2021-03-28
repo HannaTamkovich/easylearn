@@ -1,6 +1,7 @@
 package com.easylearn.easylearn.email;
 
 import com.easylearn.easylearn.security.user.model.User;
+import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,5 +33,10 @@ public class MailSenderServiceImpl implements MailSenderService {
 
             mailSender.send(user.getEmail(), "Активация аккаунта", message);
         }
+    }
+
+    @Override
+    public void sendNotification(@NotNull UserEntity userEntity) {
+        //TODO
     }
 }

@@ -19,6 +19,16 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username:
+    password:
+    protocol: smtp
+  batch:
+    job:
+      enabled: false
+    initialize-schema: always
 
 logging:
   level:
