@@ -6,7 +6,6 @@ import com.easylearn.easylearn.word.repository.entity.WordToUserEntity;
 import com.easylearn.easylearn.word.repository.entity.WordToUserEntity_;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Root;

@@ -7,6 +7,7 @@ import com.easylearn.easylearn.security.useractivation.repository.UserActivation
 import com.easylearn.easylearn.security.useractivation.repository.entity.UserActivationEntity;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,15 @@ public class UserActivationServiceImpl implements UserActivationService {
     public void generateCode(@NotNull @Valid User user) {
         log.info("Generate activation code for user: {}", user.getUsername());
 
-        var activationCode = user.getUsername() + UUID.randomUUID().toString();
+        var optEntity = userActivationRepository.findByUser_Username(user.getUsername());
+        if (optEntity.isPresent()) {
+            if (StringUtils.equals(optEntity.get().getUser().getEmail(), user.getEmail())) {
+                return;
+            }
+            userActivationRepository.delete(optEntity.get());
+        }
+
+        var activationCode = user.getUsername() + "-" + UUID.randomUUID().toString();
         var entity = UserActivationEntity.builder()
                 .user(userRepository.getOne(user.getId()))
                 .activationCode(activationCode)

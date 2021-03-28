@@ -118,6 +118,7 @@ public class UserServiceImpl implements UserService {
         log.info("Update user");
 
         var user = loadByUsername(username);
+        var email = user.getEmail();
 
         validatePassword(user, updateUserParam);
         if (!StringUtils.equals(username, updateUserParam.getUsername())) {
@@ -127,11 +128,13 @@ public class UserServiceImpl implements UserService {
         userParamConverter.toUpdatedModel(updateUserParam, user);
         updatePassword(updateUserParam, user);
 
-        var savedUser = userRepository.save(userEntityConverter.toEntity(user));
+        var savedUserEntity = userRepository.save(userEntityConverter.toEntity(user));
 
-        if (StringUtils.equals(user.getEmail(), savedUser.getEmail())) {
-            userActivationService.generateCode(user);
-            mailSenderService.sendVerificationMessage(user);
+        if (!StringUtils.equals(email, updateUserParam.getEmail())) {
+            var savedUser = userEntityConverter.toModel(savedUserEntity);
+
+            userActivationService.generateCode(savedUser);
+            mailSenderService.sendVerificationMessage(savedUser);
         }
 
         log.debug("User has been updated");
