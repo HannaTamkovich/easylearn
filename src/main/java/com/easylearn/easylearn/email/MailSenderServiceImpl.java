@@ -38,5 +38,6 @@ public class MailSenderServiceImpl implements MailSenderService {
     @Override
     public void sendNotification(@NotNull UserEntity userEntity) {
         //TODO
+        System.out.println("Email sent");
     }
 }
