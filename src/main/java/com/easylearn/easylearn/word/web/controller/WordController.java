@@ -45,6 +45,7 @@ public class WordController {
     public static final String PATH_ANSWER = WORD_PATH + "/{id}/answer";
     public static final String PATH_EMPTY_CATEGORY = WORD_PATH + "/empty-category";
     public static final String PATH_REMOVE_FROM_CATEGORY = WORD_PATH + "/{id}/remove-from-category/{categoryId}";
+    public static final String PATH_ADD_TO_DICTIONARY = WORD_PATH + "/{id}/add-to-dictionary";
 
     //TODO add to my words
 
@@ -195,5 +196,20 @@ public class WordController {
     @DeleteMapping(PATH_REMOVE_FROM_CATEGORY)
     public void deleteFromCategory(@NotNull @PathVariable("id") Long id, @NotNull @PathVariable("categoryId") Long categoryId) {
         wordService.deleteFromCategory(id, categoryId);
+    }
+
+    @Operation(summary = "Add to dictionary")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema)),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Not found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
+    })
+    @PostMapping(PATH_ADD_TO_DICTIONARY)
+    public void addToDictionary(@NotNull @PathVariable("id") Long id) {
+        wordService.addToUserWords(id);
     }
 }

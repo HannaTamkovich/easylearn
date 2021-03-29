@@ -12,7 +12,7 @@
     <changeSet author="abudai" id="user-activation-table">
         <createTable tableName="user_activation">
             <column name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="user_pkey"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_activation_pkey"/>
             </column>
 
             <column name="user_id" type="BIGINT"/>

@@ -26,7 +26,7 @@ public interface UserService {
     void create(@NotNull @Valid BaseUserParam baseUserParam);
 
     @NotNull
-    Collection<User> findAll();
+    Collection<User> findAll(String currentUserUsername);
 
     void update(@NotBlank String username, @NotNull @Valid UpdateUserParam updateUserParam);
 

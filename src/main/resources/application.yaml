@@ -25,10 +25,6 @@ spring:
     username:
     password:
     protocol: smtp
-  batch:
-    job:
-      enabled: false
-    initialize-schema: always
 
 logging:
   level:

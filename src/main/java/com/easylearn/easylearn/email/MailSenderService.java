@@ -10,5 +10,5 @@ public interface MailSenderService {
 
     void sendVerificationMessage(@NotNull @Valid User user);
 
-    void sendNotification(@NotNull UserEntity userEntity);
+    void sendNotification(@NotNull @Valid UserEntity userEntity);
 }

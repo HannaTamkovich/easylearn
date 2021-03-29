@@ -40,4 +40,6 @@ public interface WordService {
     void addToCategory(@NotNull Long id, @NotNull Long categoryId);
 
     void deleteFromCategory(@NotNull Long id, @NotNull Long categoryId);
+
+    void addToUserWords(@NotNull Long id);
 }

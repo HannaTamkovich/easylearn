@@ -108,8 +108,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @NotNull
     @Transactional(readOnly = true)
-    public Collection<User> findAll() {
-        return userEntityConverter.toModels(userRepository.findAll());
+    public Collection<User> findAll(String currentUserUsername) {
+        var currentUser = loadByUsername(currentUserUsername);
+        var userEntities = userRepository.findByUsernameNotAndLanguage(currentUser.getUsername(), currentUser.getLanguage());
+        return userEntityConverter.toModels(userEntities);
     }
 
     @Override

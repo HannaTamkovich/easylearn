@@ -135,7 +135,7 @@ public class WordServiceImpl implements WordService {
                     return savedWord;
                 });
 
-        addToMyWords(wordEntity.getId());
+        addToUserWords(wordEntity.getId());
         Optional.ofNullable(wordParam.getCategoryId())
                 .ifPresent(it -> addToCategory(wordEntity.getId(), it));
 
@@ -249,6 +249,22 @@ public class WordServiceImpl implements WordService {
         removeFromCategory(wordToUserEntity);
     }
 
+    @Override
+    @Transactional
+    public void addToUserWords(@NotNull Long id) {
+        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+        validatingForDuplication(id, currentUser);
+
+        var wordToUserEntity = WordToUserEntity.builder()
+                .wordId(id)
+                .userId(currentUser.getId())
+                .numberOfAnswers(0L)
+                .numberOfCorrectAnswers(0L)
+                .dateOfLastAnswer(Instant.now())
+                .build();
+        wordToUserRepository.save(wordToUserEntity);
+    }
+
     private PageResult<Card> convertToCard(List<Word> words, CardFilter cardFilter) {
         var content = words.stream()
                 .map(it -> {
@@ -316,20 +332,6 @@ public class WordServiceImpl implements WordService {
         word.setTranslation(wordParam.getTranslation());
         updateCategory(word, wordParam);
         return word;
-    }
-
-    private void addToMyWords(Long id) {
-        var currentUser = userService.loadByUsername(currentUserService.getUsername());
-        validatingForDuplication(id, currentUser);
-
-        var wordToUserEntity = WordToUserEntity.builder()
-                .wordId(id)
-                .userId(currentUser.getId())
-                .numberOfAnswers(0L)
-                .numberOfCorrectAnswers(0L)
-                .dateOfLastAnswer(Instant.now())
-                .build();
-        wordToUserRepository.save(wordToUserEntity);
     }
 
     private CategoryEntity getCategoryEntity(Long categoryId) {

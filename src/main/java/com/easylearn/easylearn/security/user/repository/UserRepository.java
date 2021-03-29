@@ -1,6 +1,7 @@
 package com.easylearn.easylearn.security.user.repository;
 
 
+import com.easylearn.easylearn.language.model.Language;
 import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,4 +18,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     boolean existsByUsername(String username);
 
     Collection<UserEntity> findByDateOfLastVisitLessThan(Instant date);
+
+    Collection<UserEntity> findByUsernameNotAndLanguage(String username, Language language);
 }

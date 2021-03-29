@@ -5,6 +5,7 @@ import com.easylearn.easylearn.security.service.CurrentUserService;
 import com.easylearn.easylearn.security.user.dto.UpdateUserParam;
 import com.easylearn.easylearn.security.user.service.UserService;
 import com.easylearn.easylearn.security.user.web.converter.UserWebConverter;
+import com.easylearn.easylearn.security.user.web.dto.UserPageResponse;
 import com.easylearn.easylearn.security.user.web.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -36,6 +37,8 @@ import java.util.Collection;
 @CrossOrigin
 public class UserController {
 
+    //TODO валидация на наличие пользователя с такой же почтой
+
     private final UserService userService;
     private final UserWebConverter userWebConverter;
     private final CurrentUserService currentUserService;
@@ -44,13 +47,14 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = UserResponse.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = UserPageResponse.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content())
     })
     @GetMapping
-    public Collection<UserResponse> findAll() {
-        var users = userService.findAll();
-        return userWebConverter.toResponses(users);
+    public Collection<UserPageResponse> findAll() {
+        var currentUserUsername = currentUserService.getUsername();
+        var users = userService.findAll(currentUserUsername);
+        return userWebConverter.toUsersPageResponses(users);
     }
 
     @Operation(summary = "Get information about me")

@@ -33,7 +33,7 @@ public class TokenStoreServiceImpl implements TokenStoreService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final Cache<String, String> tokenUsernameMap = CacheBuilder.newBuilder().expireAfterAccess(Duration.ofMinutes(TOKEN_EXPIRATION_IN_MINUTES)).build();
 
-    @Transactional(readOnly = true)
+    @Transactional
     @Override
     @NotNull
     public String create(@Valid @NotNull LoginParam loginParam) {

@@ -60,7 +60,7 @@ public class UserActivationServiceImpl implements UserActivationService {
         log.info("Activate account");
         userActivationRepository.findByUser_Username(username)
                 .ifPresentOrElse(user -> {
-                            if (user.getInvalidateDate().isAfter(Instant.now())) {
+                            if (user.getInvalidateDate().isBefore(Instant.now())) {
                                 userActivationRepository.delete(user);
                                 userRepository.delete(user.getUser());
                                 throw new EntityNotFoundException("Ссылка не найдена");
