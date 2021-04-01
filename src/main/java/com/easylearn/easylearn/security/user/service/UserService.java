@@ -3,6 +3,7 @@ package com.easylearn.easylearn.security.user.service;
 import com.easylearn.easylearn.security.user.dto.BaseUserParam;
 import com.easylearn.easylearn.security.user.dto.UpdateUserParam;
 import com.easylearn.easylearn.security.user.model.User;
+import com.sun.istack.Nullable;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -26,7 +27,7 @@ public interface UserService {
     void create(@NotNull @Valid BaseUserParam baseUserParam);
 
     @NotNull
-    Collection<User> findAll(String currentUserUsername);
+    Collection<User> findAll(@NotNull String currentUserUsername, @Nullable String search);
 
     void update(@NotBlank String username, @NotNull @Valid UpdateUserParam updateUserParam);
 

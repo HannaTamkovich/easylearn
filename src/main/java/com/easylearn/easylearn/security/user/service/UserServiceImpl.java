@@ -11,6 +11,7 @@ import com.easylearn.easylearn.security.user.repository.converter.UserEntityConv
 import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import com.easylearn.easylearn.security.user.service.converter.UserParamConverter;
 import com.easylearn.easylearn.security.useractivation.service.UserActivationService;
+import com.sun.istack.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -108,7 +109,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @NotNull
     @Transactional(readOnly = true)
-    public Collection<User> findAll(String currentUserUsername) {
+    public Collection<User> findAll(@NotNull String currentUserUsername, @Nullable String search) {
+        //TODO search
         var currentUser = loadByUsername(currentUserUsername);
         var userEntities = userRepository.findByUsernameNotAndLanguage(currentUser.getUsername(), currentUser.getLanguage());
         return userEntityConverter.toModels(userEntities);

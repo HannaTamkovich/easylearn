@@ -31,7 +31,6 @@ public final class CardSpecMaker {
             Root<WordToUserEntity> wordToUserEntityRoot = query.from(WordToUserEntity.class);
             var userPredicate = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.USER_ID), userId);
             var wordPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.WORD_ID), root.get(WordEntity_.ID));
-            //query.orderBy(builder.desc(wordToUserEntityRoot.get(WordToUserEntity_.DATE_OF_LAST_ANSWER)));
             return builder.and(userPredicate, wordPredicates);
         };
     }

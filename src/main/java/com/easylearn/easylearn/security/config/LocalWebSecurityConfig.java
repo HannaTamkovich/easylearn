@@ -23,9 +23,7 @@ public class LocalWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 "/logout",
                 "/sign-up",
                 "/activate/**",
-                "/swagger-ui/**",
-                "/upload-data",
-                "v3/api-docs/**");
+                "/swagger-ui/**");
     }
 
     @Override
@@ -34,14 +32,12 @@ public class LocalWebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(STATELESS)
                 .and()
                 .authorizeRequests().antMatchers("/").permitAll().and()
-                .authorizeRequests().antMatchers("/h2-console/**").permitAll().and()
                 .authorizeRequests().antMatchers("/activate/**").permitAll().and()
                 .authorizeRequests().antMatchers("/sign-up").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
         http.cors();
-        http.csrf().ignoringAntMatchers("/h2-console/**");
         http.csrf().ignoringAntMatchers("/sign-up");
         http.csrf().disable();
         http.headers().frameOptions().disable();

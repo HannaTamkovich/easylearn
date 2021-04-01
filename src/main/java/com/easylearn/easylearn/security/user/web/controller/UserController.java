@@ -7,6 +7,7 @@ import com.easylearn.easylearn.security.user.service.UserService;
 import com.easylearn.easylearn.security.user.web.converter.UserWebConverter;
 import com.easylearn.easylearn.security.user.web.dto.UserPageResponse;
 import com.easylearn.easylearn.security.user.web.dto.UserResponse;
+import com.sun.istack.Nullable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,16 +29,21 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.websocket.server.PathParam;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping(UserController.BASE_PATH)
 @Validated
 @AllArgsConstructor
 @CrossOrigin
 public class UserController {
 
     //TODO валидация на наличие пользователя с такой же почтой
+
+    public static final String BASE_PATH = "/users";
+    public static final String ME_PATH = "/me";
+    public static final String USERNAME_PATH = "/{username}";
 
     private final UserService userService;
     private final UserWebConverter userWebConverter;
@@ -51,9 +57,9 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content())
     })
     @GetMapping
-    public Collection<UserPageResponse> findAll() {
+    public Collection<UserPageResponse> findAll(@Nullable @PathParam("search") String search) {
         var currentUserUsername = currentUserService.getUsername();
-        var users = userService.findAll(currentUserUsername);
+        var users = userService.findAll(currentUserUsername, search);
         return userWebConverter.toUsersPageResponses(users);
     }
 
@@ -65,7 +71,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Forbidden",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/me")
+    @GetMapping(ME_PATH)
     public UserResponse me() {
         var user = userService.loadByUsername(currentUserService.getUsername());
         return userWebConverter.toResponse(user);
@@ -80,7 +86,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Not found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/{username}")
+    @GetMapping(USERNAME_PATH)
     public UserResponse read(@NotNull @PathVariable String username) {
         var user = userService.loadByUsername(username);
         return userWebConverter.toResponse(user);
@@ -95,7 +101,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Not found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PutMapping("/{username}")
+    @PutMapping(USERNAME_PATH)
     public void update(@NotNull @PathVariable String username, @Valid @NotNull @RequestBody UpdateUserParam updateUserParam) {
         userService.update(username, updateUserParam);
     }
@@ -109,7 +115,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Not found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @DeleteMapping("/{username}")
+    @DeleteMapping(USERNAME_PATH)
     public void delete(@NotBlank @PathVariable String username) {
         userService.delete(username);
     }

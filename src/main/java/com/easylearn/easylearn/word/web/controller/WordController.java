@@ -8,6 +8,7 @@ import com.easylearn.easylearn.word.dto.WordParam;
 import com.easylearn.easylearn.word.service.WordService;
 import com.easylearn.easylearn.word.web.converter.CardWebConverter;
 import com.easylearn.easylearn.word.web.converter.WordWebConverter;
+import com.easylearn.easylearn.word.web.dto.AnswerResponse;
 import com.easylearn.easylearn.word.web.dto.CardResponse;
 import com.easylearn.easylearn.word.web.dto.WordResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,8 +47,6 @@ public class WordController {
     public static final String PATH_EMPTY_CATEGORY = WORD_PATH + "/empty-category";
     public static final String PATH_REMOVE_FROM_CATEGORY = WORD_PATH + "/{id}/remove-from-category/{categoryId}";
     public static final String PATH_ADD_TO_DICTIONARY = WORD_PATH + "/{id}/add-to-dictionary";
-
-    //TODO add to my words
 
     private final WordService wordService;
     private final WordWebConverter wordWebConverter;
@@ -161,8 +160,9 @@ public class WordController {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
     })
     @GetMapping(PATH_ANSWER)
-    public boolean answer(@NotNull @PathVariable("id") Long id, @NotBlank @PathParam(value = "selectedValue") String selectedValue) {
-        return wordService.answer(id, selectedValue);
+    public AnswerResponse answer(@NotNull @PathVariable("id") Long id, @NotBlank @PathParam(value = "selectedValue") String selectedValue) {
+        var isCorrectAnswer = wordService.answer(id, selectedValue);
+        return new AnswerResponse(id, selectedValue, isCorrectAnswer);
     }
 
     @Operation(summary = "Get all words")

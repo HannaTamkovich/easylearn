@@ -22,7 +22,6 @@ import com.easylearn.easylearn.word.repository.converter.WordEntityConverter;
 import com.easylearn.easylearn.word.repository.entity.WordEntity;
 import com.easylearn.easylearn.word.repository.entity.WordEntity_;
 import com.easylearn.easylearn.word.repository.entity.WordToUserEntity;
-import com.easylearn.easylearn.word.repository.entity.WordToUserEntity_;
 import com.easylearn.easylearn.word.repository.specification.CardSpecMaker;
 import com.easylearn.easylearn.word.repository.specification.WordSpecMaker;
 import com.easylearn.easylearn.word.service.converter.WordParamConverter;
@@ -41,6 +40,7 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -65,7 +65,6 @@ public class WordServiceImpl implements WordService {
     private final WordEntityConverter wordEntityConverter;
 
     private final Sort defaultSort = Sort.by(WordEntity_.WORD).ascending();
-    private final Sort defaultSortUserWords = Sort.by(WordToUserEntity_.DATE_OF_LAST_ANSWER).ascending();
 
     @Override
     @NotNull
@@ -105,17 +104,28 @@ public class WordServiceImpl implements WordService {
     public PageResult<Card> findAllCards(@NotNull CardFilter cardFilter) {
         log.info("Find cards by filter");
 
-        var userId = cardFilter.isOnlyUserWords() ? userService.loadByUsername(currentUserService.getUsername()).getId() : null;
-        var spec = CardSpecMaker.makeSpec(userId);
-        var wordEntities = wordRepository.findAll(spec);
-        var words = wordEntityConverter.toModels(wordEntities).stream()
-                .collect(Collectors.toMap(Word::getId, Function.identity()));
+        List<Word> sortedWords;
 
-        var wordToUserEntities = Optional.ofNullable(userId)
-                .map(wordToUserRepository::findAllByUserIdOrderByDateOfLastAnswerAsc)
-                .orElseGet(() -> wordToUserRepository.findAll(defaultSortUserWords));
+        if (cardFilter.isOnlyUserWords()) {
+            var userId = userService.loadByUsername(currentUserService.getUsername()).getId();
+            var spec = CardSpecMaker.makeSpec(userId);
+            var wordEntities = wordRepository.findAll(spec);
 
-        var sortedWords = wordToUserEntities.stream().map(it -> words.get(it.getId())).collect(Collectors.toList());
+            var words = getIdToWord(wordEntities);
+
+            sortedWords = wordToUserRepository.findAllByUserIdOrderByDateOfLastAnswerAsc(userId)
+                    .stream().map(it -> words.get(it.getWordId())).collect(Collectors.toList());
+
+        } else {
+            var currentUserLanguage = currentUserService.getLanguage();
+            var wordEntities = wordRepository.findByLanguage(currentUserLanguage);
+
+            var words = getIdToWord(wordEntities);
+            var wordIds = wordEntities.stream().map(WordEntity::getId).collect(Collectors.toSet());
+
+            sortedWords = wordToUserRepository.findAllByWordIdInOrderByDateOfLastAnswerAsc(wordIds)
+                    .stream().map(it -> words.get(it.getWordId())).collect(Collectors.toList());
+        }
 
         return convertToCard(sortedWords, cardFilter);
     }
@@ -356,5 +366,10 @@ public class WordServiceImpl implements WordService {
         if (!Objects.equals(wordLanguage, categoryEntity.getLanguage())) {
             throw new ServiceException("Слово и категория имеют различные языки.");
         }
+    }
+
+    private Map<Long, Word> getIdToWord(Collection<WordEntity> wordEntities) {
+        return wordEntityConverter.toModels(wordEntities).stream()
+                .collect(Collectors.toMap(Word::getId, Function.identity()));
     }
 }
