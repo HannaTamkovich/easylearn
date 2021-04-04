@@ -11,13 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ContextUserInfoProvider implements UserInfoProvider {
 
-    private final UserService userService;
-
-    @Override
-    public User load() {
-        return userService.loadByUsername(getUser().getUsername());
-    }
-
     @Override
     public User getUser() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

@@ -136,7 +136,8 @@ public class WordServiceImpl implements WordService {
         log.info("Create word");
 
         var userLanguage = currentUserService.getLanguage();
-        var wordEntity = wordRepository.findByWordAndTranslationAndLanguage(wordParam.getWord(), wordParam.getTranslation(), userLanguage)
+        var wordEntity = wordRepository
+                .findByWordIgnoreCaseAndTranslationIgnoreCaseAndLanguage(wordParam.getWord(), wordParam.getTranslation(), userLanguage)
                 .orElseGet(() -> {
                     var word = wordParamConverter.toModel(wordParam);
                     word.setLanguage(userLanguage);
@@ -166,8 +167,8 @@ public class WordServiceImpl implements WordService {
             wordRepository.save(wordEntityConverter.toEntity(updatedWord));
 
         } else if (countByWordId > 1) {
-            create(wordParam);
             deleteFromUserList(id, currentUser);
+            create(wordParam);
 
         } else {
             throw new EntityNotFoundException(WordEntity.class.getSimpleName(), id);
@@ -276,7 +277,7 @@ public class WordServiceImpl implements WordService {
     }
 
     private PageResult<Card> convertToCard(List<Word> words, CardFilter cardFilter) {
-        var content = words.stream()
+        var cards = words.stream()
                 .map(it -> {
                     var randomWords = Set.of(
                             russianWordRepository.findRussianWord(it.getTranslation()).getWord().toLowerCase(),
@@ -289,11 +290,12 @@ public class WordServiceImpl implements WordService {
                             .word(it.getWord())
                             .translations(randomWords)
                             .build();
-                }).collect(Collectors.toSet());
+                }).collect(Collectors.toList());
 
         var pageNumber = cardFilter.getPageNumber();
         var pageSize = cardFilter.getPageSize();
         var totalElements = words.size();
+        var content = cards.subList(pageNumber * pageSize, Math.min((pageNumber + 1) * pageSize, totalElements));
         var totalPages = BigDecimal.valueOf(totalElements).divide(BigDecimal.valueOf(pageSize), RoundingMode.UP).toBigInteger().intValue();
 
         return new PageResult<>(content, totalPages, totalElements, pageNumber);

@@ -47,45 +47,34 @@ public class UserServiceImpl implements UserService {
     @Override
     @NotNull
     public Optional<User> findByUsernameAndActiveStatus(@NotNull String username) {
-        log.debug("Reading user: '{}'", username);
-        var userEntityOpt = userRepository.findByUsernameAndDeletedFalse(username);
-        return userEntityOpt.map(userEntity -> {
-            var user = userEntityConverter.toModel(userEntity);
-            log.debug("User has been read: '{}'", user);
-            return user;
-        });
+        log.debug("Find user by username: '{}'", username);
+
+        return userRepository.findByUsernameAndDeletedFalse(username)
+                .map(userEntityConverter::toModel);
     }
 
     @Transactional(readOnly = true)
     @NotNull
     @Override
     public User loadByUsername(@NotNull String username) {
-        log.debug("Reading user: '{}'", username);
+        log.debug("Load user by username: '{}'", username);
+
         var userEntity = loadUserEntity(username);
-        var user = userEntityConverter.toModel(userEntity);
-        log.debug("User has been read: '{}'", user);
-        return user;
+        return userEntityConverter.toModel(userEntity);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public boolean existsByUsername(@NotNull String username) {
-        return userRepository.existsByUsername(username);
-    }
-
-    @Transactional(readOnly = true)
     @NotNull
-    @Override
-    public User loadById(@NotNull Long id) {
-        log.debug("Reading user: '{}'", id);
-        var userEntity = userRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("User account with id '{}' not found", id);
-                    throw new EntityNotFoundException(UserEntity.class.getName(), id);
-                });
-        var user = userEntityConverter.toModel(userEntity);
-        log.debug("User has been read: '{}'", user);
-        return user;
+    @Transactional(readOnly = true)
+    public Collection<User> findAll(@NotNull String currentUserUsername, @Nullable String search) {
+        log.info("Find user list");
+
+        var language = loadByUsername(currentUserUsername).getLanguage();
+        var userEntities = Optional.ofNullable(search)
+                .map(it -> userRepository.findByUsernameNotAndLanguageAndUsernameContainsOrderByUsername(currentUserUsername, language, it))
+                .orElse(userRepository.findByUsernameNotAndLanguageOrderByUsername(currentUserUsername, language));
+
+        return userEntityConverter.toModels(userEntities);
     }
 
     @Override
@@ -94,6 +83,7 @@ public class UserServiceImpl implements UserService {
         log.info("Creating new user");
 
         validateUserByUsername(baseUserParam);
+        validateEmail(baseUserParam.getEmail());
 
         var userToSave = userParamConverter.toModel(baseUserParam);
         userToSave.setDateOfLastVisit(Instant.now());
@@ -107,16 +97,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @NotNull
-    @Transactional(readOnly = true)
-    public Collection<User> findAll(@NotNull String currentUserUsername, @Nullable String search) {
-        //TODO search
-        var currentUser = loadByUsername(currentUserUsername);
-        var userEntities = userRepository.findByUsernameNotAndLanguage(currentUser.getUsername(), currentUser.getLanguage());
-        return userEntityConverter.toModels(userEntities);
-    }
-
-    @Override
     @Transactional
     public void update(@NotBlank String username, @NotNull @Valid UpdateUserParam updateUserParam) {
         log.info("Update user");
@@ -125,9 +105,7 @@ public class UserServiceImpl implements UserService {
         var email = user.getEmail();
 
         validatePassword(user, updateUserParam);
-        if (!StringUtils.equals(username, updateUserParam.getUsername())) {
-            validateUserByUsername(updateUserParam);
-        }
+        validateEmailToUpdate(updateUserParam, email);
 
         userParamConverter.toUpdatedModel(updateUserParam, user);
         updatePassword(updateUserParam, user);
@@ -168,14 +146,11 @@ public class UserServiceImpl implements UserService {
 
     private UserEntity loadUserEntity(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> {
-                    log.error("User account '{}' not found", username);
-                    throw new EntityNotFoundException(UserEntity.class.getName());
-                });
+                .orElseThrow(() -> new EntityNotFoundException(UserEntity.class.getName()));
     }
 
     private void validateUserByUsername(BaseUserParam baseUserParam) {
-        if (existsByUsername(baseUserParam.getUsername())) {
+        if (userRepository.existsByUsername(baseUserParam.getUsername())) {
             throw new DuplicateException(format("Логин ('%s') занят. Введите другой", baseUserParam.getUsername()));
         }
     }
@@ -190,5 +165,17 @@ public class UserServiceImpl implements UserService {
         var newPassword = StringUtils.isNotBlank(updateUserParam.getNewPassword()) ?
                 passwordEncoder.encode(updateUserParam.getNewPassword()) : passwordEncoder.encode(user.getPassword());
         user.setPassword(newPassword);
+    }
+
+    private void validateEmail(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new DuplicateException(format("Пользователь с почтной '%s' уже существует", email));
+        }
+    }
+
+    private void validateEmailToUpdate(UpdateUserParam updateUserParam, String email) {
+        if (!StringUtils.equals(email, updateUserParam.getEmail())) {
+            validateEmail(updateUserParam.getEmail());
+        }
     }
 }

@@ -42,7 +42,7 @@ public class CategoryEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     private Language language;
 
-    //@NotNull
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;

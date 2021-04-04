@@ -2,6 +2,7 @@ package com.easylearn.easylearn.security.service;
 
 import com.easylearn.easylearn.language.model.Language;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -34,7 +35,7 @@ public class DefaultCurrentUserService implements CurrentUserService {
 
     private void checkUserIsLoggedIn() {
         if (!isLoggedIn()) {
-            throw new IllegalStateException("No user is logged in");
+            throw new AccessDeniedException("No user is logged in");
         }
     }
 }

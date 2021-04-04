@@ -9,7 +9,7 @@ import javax.validation.constraints.PositiveOrZero;
 @Data
 public class CardFilter {
 
-    private static final int DEFAULT_PAGE_SIZE = 5;
+    private static final int DEFAULT_PAGE_SIZE = 3;
     private static final int DEFAULT_PAGE_NUMBER = 0;
 
     @PositiveOrZero

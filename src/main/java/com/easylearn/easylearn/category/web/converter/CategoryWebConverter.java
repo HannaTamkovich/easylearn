@@ -23,11 +23,6 @@ public class CategoryWebConverter {
     private final WordService wordService;
 
     @NotNull
-    public Collection<CategoryResponse> toResponses(@NotNull Collection<Category> categories) {
-        return categories.stream().map(this::toResponse).collect(Collectors.toList());
-    }
-
-    @NotNull
     public Collection<DefaultCategoryResponse> toDefaultResponses(@NotNull Collection<Category> categories) {
         return categories.stream().map(this::toResponse).collect(Collectors.toList());
     }

@@ -40,6 +40,10 @@ import java.util.Collection;
 @CrossOrigin
 public class WordController {
 
+    //TODO что-то не так с добавлением слова с ловарь, а потом в категорию
+    //TODO проблема с ответами чужих слов
+    //TODO сделать таблицу с ответами пользователя
+
     public static final String WORD_PATH = "/words";
     public static final String CARD_PATH = "/cards";
     public static final String PATH_BY_ID = WORD_PATH + "/{id}";

@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
-
-import static java.util.stream.Collectors.toSet;
+import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
@@ -24,7 +23,7 @@ public class UserEntityConverter {
 
     @NotNull
     public Collection<User> toModels(@NotNull Collection<UserEntity> userEntities) {
-        return userEntities.stream().map(this::toModel).collect(toSet());
+        return userEntities.stream().map(this::toModel).collect(Collectors.toList());
     }
 
     @NotNull
@@ -34,6 +33,6 @@ public class UserEntityConverter {
 
     @NotNull
     public Collection<UserEntity> toEntities(@NotNull Collection<User> users) {
-        return users.stream().map(this::toEntity).collect(toSet());
+        return users.stream().map(this::toEntity).collect(Collectors.toList());
     }
 }

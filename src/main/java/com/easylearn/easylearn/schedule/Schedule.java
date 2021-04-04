@@ -23,7 +23,7 @@ public class Schedule {
     private MailSenderService mailSenderService;
 
     //@Scheduled(cron = "0 */1 * * * ?") //every minute
-    @Scheduled(cron = "0 11 * * * ?") //every day at 11 am
+    @Scheduled(cron = "0 0 11 * * ?") //every day at 11 am
     public void sendMailNotifications() {
         log.info("Start to send notifications");
         var yesterday = Instant.now().minus(1, ChronoUnit.DAYS);

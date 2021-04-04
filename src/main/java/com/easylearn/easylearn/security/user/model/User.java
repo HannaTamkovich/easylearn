@@ -1,6 +1,7 @@
 package com.easylearn.easylearn.security.user.model;
 
 import com.easylearn.easylearn.language.model.Language;
+import com.sun.istack.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 import java.time.Instant;
 import java.util.Collection;
@@ -76,6 +78,9 @@ public class User implements UserDetails {
 
     @NotNull
     private boolean deleted;
+
+    @Nullable
+    private Long numberOfAllAnswers;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

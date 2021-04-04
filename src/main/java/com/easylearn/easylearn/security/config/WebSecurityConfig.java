@@ -2,17 +2,23 @@ package com.easylearn.easylearn.security.config;
 
 import com.easylearn.easylearn.security.auth.filter.UserAuthenticationFilter;
 import lombok.AllArgsConstructor;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.time.Instant;
+
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @EnableWebSecurity
 @AllArgsConstructor
-public class LocalWebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserAuthenticationFilter authenticationFilter;
 

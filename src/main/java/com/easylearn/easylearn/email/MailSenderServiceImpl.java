@@ -40,9 +40,9 @@ public class MailSenderServiceImpl implements MailSenderService {
     public void sendNotification(@NotNull @Valid UserEntity userEntity) {
         if (!StringUtils.isEmpty(userEntity.getEmail())) {
             String message = String.format(
-                    "Привет, %s! \n " +
+                    "Привет, %s! \n" +
                             "Дорогой пользователь, ты давно не заходил к нам. Может вспомним изученные слова? \n" +
-                            "Жду тебя в гости! \n " +
+                            "Жду тебя в гости! \n" +
                             "С уважением EasyLearn",
                     userEntity.getUsername()
             );

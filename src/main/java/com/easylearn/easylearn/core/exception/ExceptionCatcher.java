@@ -10,9 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -46,13 +44,6 @@ public class ExceptionCatcher {
         return new ResponseEntity<>(error, FORBIDDEN);
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    private ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
-        var error = ErrorResponse.of(BAD_REQUEST, "Constraint violations", ex.getMessage());
-        log.warn("ConstraintViolationException was thrown", ex);
-        return new ResponseEntity<>(error, BAD_REQUEST);
-    }
-
     @ExceptionHandler(ValidationException.class)
     private ResponseEntity<ErrorResponse> handleValidation(ValidationException ex) {
         var error = ErrorResponse.of(BAD_REQUEST, "Validation error", ex.getMessage());
@@ -60,31 +51,24 @@ public class ExceptionCatcher {
         return new ResponseEntity<>(error, BAD_REQUEST);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> illegalArgumentException(IllegalArgumentException ex) {
-        var error = ErrorResponse.of(BAD_REQUEST, "Illegal argument", ex.getMessage());
-        log.warn("IllegalArgumentException was thrown", ex);
-        return new ResponseEntity<>(error, BAD_REQUEST);
-    }
-
-    @ExceptionHandler(EntityExistsException.class)
-    public ResponseEntity<ErrorResponse> illegalArgumentException(EntityExistsException ex) {
-        var error = ErrorResponse.of(BAD_REQUEST, "Already exists", ex.getMessage());
-        log.warn("EntityExistsException was thrown", ex);
-        return new ResponseEntity<>(error, BAD_REQUEST);
-    }
-
     @ExceptionHandler(DuplicateException.class)
     public ResponseEntity<ErrorResponse> duplicateException(DuplicateException ex) {
         var error = ErrorResponse.of(CONFLICT, "Duplicate operation", ex.getMessage());
-        log.warn("Duplicate operation", ex);
+        log.warn("DuplicateException was thrown", ex);
         return new ResponseEntity<>(error, CONFLICT);
     }
 
-    @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
-    public ResponseEntity<ErrorResponse> duplicateException(AuthenticationException ex) {
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> usernameNotFoundException(AuthenticationException ex) {
         var error = ErrorResponse.of(UNAUTHORIZED, "Authentication exception", ex.getMessage());
-        log.warn("Authentication exception", ex);
+        log.warn("UsernameNotFoundException was thrown", ex);
+        return new ResponseEntity<>(error, UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> badCredentialsException(AuthenticationException ex) {
+        var error = ErrorResponse.of(UNAUTHORIZED, "Authentication exception", ex.getMessage());
+        log.warn("BadCredentialsException was thrown", ex);
         return new ResponseEntity<>(error, UNAUTHORIZED);
     }
 }

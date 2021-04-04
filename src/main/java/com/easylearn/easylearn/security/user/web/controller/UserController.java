@@ -39,7 +39,8 @@ import java.util.Collection;
 @CrossOrigin
 public class UserController {
 
-    //TODO валидация на наличие пользователя с такой же почтой
+    //TODO восстановление аккаунта
+    //TODO забыл пароль
 
     public static final String BASE_PATH = "/users";
     public static final String ME_PATH = "/me";

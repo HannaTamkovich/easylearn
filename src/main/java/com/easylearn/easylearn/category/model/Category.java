@@ -24,6 +24,6 @@ public class Category {
     @NotNull
     private Language language;
 
-    //@NotNull
+    @NotNull
     private User user;
 }

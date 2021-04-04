@@ -35,5 +35,4 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         var userOpt = tokenStoreService.findByToken(token);
         return userOpt.map(it -> new UsernamePasswordAuthenticationToken(it, null, it.getAuthorities()));
     }
-
 }

@@ -17,7 +17,11 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     boolean existsByUsername(String username);
 
+    boolean existsByEmail(String email);
+
     Collection<UserEntity> findByDateOfLastVisitLessThan(Instant date);
 
-    Collection<UserEntity> findByUsernameNotAndLanguage(String username, Language language);
+    Collection<UserEntity> findByUsernameNotAndLanguageOrderByUsername(String username, Language language);
+
+    Collection<UserEntity> findByUsernameNotAndLanguageAndUsernameContainsOrderByUsername(String username, Language language, String search);
 }

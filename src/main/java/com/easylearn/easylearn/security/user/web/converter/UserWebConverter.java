@@ -11,8 +11,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
-
-import static java.util.stream.Collectors.toSet;
+import java.util.stream.Collectors;
 
 @Validated
 @Component
@@ -30,7 +29,7 @@ public class UserWebConverter {
 
     @NotNull
     public Collection<UserPageResponse> toUsersPageResponses(@NotNull Collection<User> users) {
-        return users.stream().map(this::toPageResponse).collect(toSet());
+        return users.stream().map(this::toPageResponse).collect(Collectors.toList());
     }
 
     private UserPageResponse toPageResponse(User user) {

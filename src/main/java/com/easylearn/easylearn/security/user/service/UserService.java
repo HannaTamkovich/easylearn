@@ -16,18 +16,13 @@ public interface UserService {
     @NotNull
     User loadByUsername(@NotNull String username);
 
-    boolean existsByUsername(@NotNull String username);
-
     @NotNull
     Optional<User> findByUsernameAndActiveStatus(@NotNull String username);
 
     @NotNull
-    User loadById(@NotNull Long id);
+    Collection<User> findAll(@NotNull String currentUserUsername, @Nullable String search);
 
     void create(@NotNull @Valid BaseUserParam baseUserParam);
-
-    @NotNull
-    Collection<User> findAll(@NotNull String currentUserUsername, @Nullable String search);
 
     void update(@NotBlank String username, @NotNull @Valid UpdateUserParam updateUserParam);
 
