@@ -63,6 +63,14 @@ public class UserServiceImpl implements UserService {
         return userEntityConverter.toModel(userEntity);
     }
 
+    @Transactional(readOnly = true)
+    @NotNull
+    @Override
+    public UserEntity loadUserEntity(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException(UserEntity.class.getName()));
+    }
+
     @Override
     @NotNull
     @Transactional(readOnly = true)
@@ -142,11 +150,6 @@ public class UserServiceImpl implements UserService {
 
         user.setDateOfLastVisit(Instant.now());
         userRepository.save(userEntityConverter.toEntity(user));
-    }
-
-    private UserEntity loadUserEntity(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException(UserEntity.class.getName()));
     }
 
     private void validateUserByUsername(BaseUserParam baseUserParam) {

@@ -21,8 +21,10 @@ public class WordWebConverter {
     private final CategoryService categoryService;
 
     @NotNull
-    public Collection<WordResponse> toResponses(@NotNull Collection<Word> words) {
-        return words.stream().map(this::toResponse).collect(Collectors.toList());
+    public Collection<WordResponse> toResponses(@NotNull Collection<Word> words, @NotNull String username) {
+        return words.stream().map(this::toResponse)
+                .peek(it -> it.setCategory(getUserCategoryResponse(it.getId(), username)))
+                .collect(Collectors.toList());
     }
 
     @NotNull
@@ -33,17 +35,23 @@ public class WordWebConverter {
     }
 
     @NotNull
-    public Collection<WordResponse> toEmptyResponses(@NotNull Collection<Word> words) {
-        return words.stream().map(this::toEmptyResponse).collect(Collectors.toList());
+    public Collection<WordResponse> toBaseResponses(@NotNull Collection<Word> words) {
+        return words.stream().map(this::toBaseResponse).collect(Collectors.toList());
     }
 
     @NotNull
-    public WordResponse toEmptyResponse(@NotNull Word word) {
+    public WordResponse toBaseResponse(@NotNull Word word) {
         return modelMapper.map(word, WordResponse.class);
     }
 
     private DefaultCategoryResponse getCategoryResponse(Long wordId) {
         return categoryService.findByWordIdForCurrentUser(wordId)
+                .map(it -> modelMapper.map(it, DefaultCategoryResponse.class))
+                .orElse(null);
+    }
+
+    private DefaultCategoryResponse getUserCategoryResponse(Long wordId, String username) {
+        return categoryService.findByWordIdForUser(wordId, username)
                 .map(it -> modelMapper.map(it, DefaultCategoryResponse.class))
                 .orElse(null);
     }

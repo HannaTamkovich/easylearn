@@ -3,6 +3,7 @@ package com.easylearn.easylearn.security.user.service;
 import com.easylearn.easylearn.security.user.dto.BaseUserParam;
 import com.easylearn.easylearn.security.user.dto.UpdateUserParam;
 import com.easylearn.easylearn.security.user.model.User;
+import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import com.sun.istack.Nullable;
 
 import javax.validation.Valid;
@@ -15,6 +16,9 @@ public interface UserService {
 
     @NotNull
     User loadByUsername(@NotNull String username);
+
+    @NotNull
+    UserEntity loadUserEntity(@NotNull String username);
 
     @NotNull
     Optional<User> findByUsernameAndActiveStatus(@NotNull String username);

@@ -40,10 +40,6 @@ import java.util.Collection;
 @CrossOrigin
 public class WordController {
 
-    //TODO что-то не так с добавлением слова с ловарь, а потом в категорию
-    //TODO проблема с ответами чужих слов
-    //TODO сделать таблицу с ответами пользователя
-
     public static final String WORD_PATH = "/words";
     public static final String CARD_PATH = "/cards";
     public static final String PATH_BY_ID = WORD_PATH + "/{id}";
@@ -87,7 +83,7 @@ public class WordController {
     @GetMapping(WORD_PATH)
     public Collection<WordResponse> findAll(@NotNull @Valid WordFilter wordFilter) {
         var words = wordService.findAll(wordFilter);
-        return wordWebConverter.toResponses(words);
+        return wordWebConverter.toResponses(words, wordFilter.getUsername());
     }
 
     @Operation(summary = "Get all cards")
@@ -183,7 +179,7 @@ public class WordController {
     @GetMapping(PATH_EMPTY_CATEGORY)
     public Collection<WordResponse> findAllWithEmptyCategory() {
         var words = wordService.findAllWithEmptyCategory();
-        return wordWebConverter.toEmptyResponses(words);
+        return wordWebConverter.toBaseResponses(words);
     }
 
     @Operation(summary = "Delete category by id")

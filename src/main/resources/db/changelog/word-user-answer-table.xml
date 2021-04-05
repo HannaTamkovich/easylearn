@@ -1,0 +1,29 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="abudai" id="WORD_USER_ANSWER_SEQUENCE">
+        <createSequence incrementBy="1"
+                        sequenceName="word_user_answer_sequence"
+                        startValue="1"/>
+    </changeSet>
+
+    <changeSet author="abudai" id="word-user-answer-table">
+        <createTable tableName="word_user_answer">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="word_user_answer_pkey"/>
+            </column>
+            <column name="user_id" type="BIGINT"/>
+            <column name="all_answers" type="BIGINT" defaultValue="0"/>
+            <column name="correct_answers" type="BIGINT" defaultValue="0"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="abudai" id="user-to-word-user-answer-fk">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="word_user_answer"
+                                 constraintName="user_to_word_user_answer_fk" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

@@ -11,6 +11,7 @@ import com.easylearn.easylearn.core.exception.EntityNotFoundException;
 import com.easylearn.easylearn.core.exception.ServiceException;
 import com.easylearn.easylearn.language.model.Language;
 import com.easylearn.easylearn.security.service.CurrentUserService;
+import com.easylearn.easylearn.security.user.model.User;
 import com.easylearn.easylearn.security.user.service.UserService;
 import com.easylearn.easylearn.word.model.Word;
 import com.easylearn.easylearn.word.repository.WordToUserRepository;
@@ -112,10 +113,22 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Category> findByWordIdForCurrentUser(Long wordId) {
+    public Optional<Category> findByWordIdForCurrentUser(@NotNull Long wordId) {
         var currentUser = userService.loadByUsername(currentUserService.getUsername());
 
-        return wordToUserRepository.findEntityByWordIdAndUserId(wordId, currentUser.getId())
+        return findCategoryForUser(wordId, currentUser);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Category> findByWordIdForUser(@NotNull Long wordId, @NotNull String username) {
+        var currentUser = userService.loadByUsername(username);
+
+        return findCategoryForUser(wordId, currentUser);
+    }
+
+    private Optional<Category> findCategoryForUser(Long wordId, User user) {
+        return wordToUserRepository.findEntityByWordIdAndUserId(wordId, user.getId())
                 .flatMap(wordToUserEntity -> Optional.ofNullable(wordToUserEntity.getCategory())
                         .map(categoryEntityConverter::toModel));
     }

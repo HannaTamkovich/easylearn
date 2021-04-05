@@ -10,6 +10,7 @@ import com.easylearn.easylearn.handbook.russianword.repository.RussianWordReposi
 import com.easylearn.easylearn.handbook.russianword.repository.entity.RussianWordEntity;
 import com.easylearn.easylearn.security.service.CurrentUserService;
 import com.easylearn.easylearn.security.user.model.User;
+import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import com.easylearn.easylearn.security.user.service.UserService;
 import com.easylearn.easylearn.word.dto.CardFilter;
 import com.easylearn.easylearn.word.dto.WordFilter;
@@ -25,6 +26,8 @@ import com.easylearn.easylearn.word.repository.entity.WordToUserEntity;
 import com.easylearn.easylearn.word.repository.specification.CardSpecMaker;
 import com.easylearn.easylearn.word.repository.specification.WordSpecMaker;
 import com.easylearn.easylearn.word.service.converter.WordParamConverter;
+import com.easylearn.easylearn.word.useranswer.repository.WordUserAnswerRepository;
+import com.easylearn.easylearn.word.useranswer.repository.entity.WordUserAnswerEntity;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +60,7 @@ public class WordServiceImpl implements WordService {
     private final CategoryRepository categoryRepository;
     private final WordToUserRepository wordToUserRepository;
     private final RussianWordRepository russianWordRepository;
+    private final WordUserAnswerRepository wordUserAnswerRepository;
 
     private final CurrentUserService currentUserService;
     private final UserService userService;
@@ -205,19 +209,12 @@ public class WordServiceImpl implements WordService {
     public boolean answer(@NotNull Long id, @NotBlank String selectedValue) {
         log.info("Answer word {}", id);
 
-        var currentUser = userService.loadByUsername(currentUserService.getUsername());
-        var wordToUserEntity = wordToUserRepository.findByWordIdAndUserId(id, currentUser.getId());
+        var currentUserEntity = userService.loadUserEntity(currentUserService.getUsername());
         var word = findById(id);
-
         var isCorrectTranslation = StringUtils.equalsIgnoreCase(word.getTranslation(), selectedValue);
 
-        if (isCorrectTranslation) {
-            wordToUserEntity.setNumberOfCorrectAnswers(wordToUserEntity.getNumberOfCorrectAnswers() + 1);
-        }
-        wordToUserEntity.setNumberOfAnswers(wordToUserEntity.getNumberOfAnswers() + 1);
-        wordToUserEntity.setDateOfLastAnswer(Instant.now());
-
-        wordToUserRepository.save(wordToUserEntity);
+        updateWordStatistic(id, currentUserEntity, isCorrectTranslation);
+        updateUserStatistic(currentUserEntity, isCorrectTranslation);
 
         log.debug("Word has been answered");
 
@@ -373,5 +370,34 @@ public class WordServiceImpl implements WordService {
     private Map<Long, Word> getIdToWord(Collection<WordEntity> wordEntities) {
         return wordEntityConverter.toModels(wordEntities).stream()
                 .collect(Collectors.toMap(Word::getId, Function.identity()));
+    }
+
+    private void updateWordStatistic(Long id, UserEntity currentUserEntity, boolean isCorrectTranslation) {
+        wordToUserRepository.findEntityByWordIdAndUserId(id, currentUserEntity.getId())
+                .ifPresent(it -> {
+                    if (isCorrectTranslation) {
+                        it.setNumberOfCorrectAnswers(it.getNumberOfCorrectAnswers() + 1);
+                    }
+                    it.setNumberOfAnswers(it.getNumberOfAnswers() + 1);
+                    it.setDateOfLastAnswer(Instant.now());
+
+                    wordToUserRepository.save(it);
+                });
+    }
+
+    private void updateUserStatistic(UserEntity userEntity, boolean isCorrectTranslation) {
+        wordUserAnswerRepository.findByUser_Username(userEntity.getUsername())
+                .ifPresentOrElse(it -> {
+                    it.setAllAnswers(it.getAllAnswers() + 1);
+                    if (isCorrectTranslation) {
+                        it.setCorrectAnswers(it.getCorrectAnswers() + 1);
+                    }
+                    wordUserAnswerRepository.save(it);
+
+                }, () -> wordUserAnswerRepository.save(WordUserAnswerEntity.builder()
+                        .user(userEntity)
+                        .allAnswers(1L)
+                        .correctAnswers(isCorrectTranslation ? 1L : 0)
+                        .build()));
     }
 }

@@ -22,4 +22,6 @@ public interface CategoryService {
     void delete(@NotNull Long id);
 
     Optional<Category> findByWordIdForCurrentUser(@NotNull Long wordId);
+
+    Optional<Category> findByWordIdForUser(@NotNull Long wordId, @NotNull String username);
 }
