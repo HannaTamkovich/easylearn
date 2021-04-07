@@ -22,8 +22,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 "/login",
                 "/logout",
                 "/sign-up",
-                "/activate/**",
-                "/swagger-ui/**");
+                "/activate/**");
     }
 
     @Override

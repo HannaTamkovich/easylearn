@@ -11,5 +11,8 @@
     <include file="db/changelog/detection-method-dictionary-data.xml"/>
     <include file="db/changelog/user-activation-table.xml"/>
     <include file="db/changelog/word-user-answer-table.xml"/>
+    <include file="db/changelog/test-table.xml"/>
+    <include file="db/changelog/question-table.xml"/>
+    <include file="db/changelog/answer-table.xml"/>
 
 </databaseChangeLog>

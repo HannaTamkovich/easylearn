@@ -1,12 +1,11 @@
-package com.easylearn.easylearn.word.model;
+package com.easylearn.easylearn.quizz.question.model;
 
-import com.easylearn.easylearn.category.model.Category;
+import com.easylearn.easylearn.quizz.answer.model.Answer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
@@ -14,16 +13,13 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Card {
+public class Question {
 
     private Long id;
 
     @NotNull
-    private String word;
-
-    @Nullable
-    private Category category;
+    private String text;
 
     @NotNull
-    Collection<String> translations;
+    private Collection<Answer> answers;
 }

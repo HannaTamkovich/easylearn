@@ -1,0 +1,31 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="abudai" id="TEST_SEQUENCE">
+        <createSequence incrementBy="1"
+                        sequenceName="test_sequence"
+                        startValue="1"/>
+    </changeSet>
+
+    <changeSet author="abudai" id="test-table">
+        <createTable tableName="test">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="test_pkey"/>
+            </column>
+
+            <column name="name" type="NVARCHAR(255)"/>
+            <column name="language" type="NVARCHAR(255)"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="abudai" id="test-to-user-fk">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="test"
+                                 constraintName="test_to_user_account_fk" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+
+</databaseChangeLog>

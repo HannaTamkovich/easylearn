@@ -15,7 +15,6 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class Category {
 
-    @NotNull
     private Long id;
 
     @NotNull

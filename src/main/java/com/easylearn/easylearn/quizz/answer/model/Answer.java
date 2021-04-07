@@ -1,6 +1,5 @@
-package com.easylearn.easylearn.word.model;
+package com.easylearn.easylearn.quizz.answer.model;
 
-import com.easylearn.easylearn.language.model.Language;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,16 +11,13 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Word {
+public class Answer {
 
     private Long id;
 
     @NotNull
-    private String word;
+    private String text;
 
     @NotNull
-    private String translation;
-
-    @NotNull
-    private Language language;
+    private boolean isCorrectAnswer;
 }

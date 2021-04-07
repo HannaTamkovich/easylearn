@@ -1,0 +1,31 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="abudai" id="ANSWER_SEQUENCE">
+        <createSequence incrementBy="1"
+                        sequenceName="answer_sequence"
+                        startValue="1"/>
+    </changeSet>
+
+    <changeSet author="abudai" id="answer-table">
+        <createTable tableName="answer">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="answer_pkey"/>
+            </column>
+
+            <column name="text" type="NVARCHAR(255)"/>
+            <column name="is_correct_answer" type="BOOLEAN"/>
+            <column name="question_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="abudai" id="question-to-user-fk">
+        <addForeignKeyConstraint baseColumnNames="question_id" baseTableName="answer"
+                                 constraintName="answer_to_question_fk" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="question" validate="true"/>
+    </changeSet>
+
+</databaseChangeLog>

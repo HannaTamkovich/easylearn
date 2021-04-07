@@ -1,6 +1,5 @@
 package com.easylearn.easylearn.word.web.controller;
 
-import com.easylearn.easylearn.core.dto.response.ErrorResponse;
 import com.easylearn.easylearn.core.dto.response.PageResult;
 import com.easylearn.easylearn.word.dto.CardFilter;
 import com.easylearn.easylearn.word.dto.WordFilter;
@@ -11,14 +10,8 @@ import com.easylearn.easylearn.word.web.converter.WordWebConverter;
 import com.easylearn.easylearn.word.web.dto.AnswerResponse;
 import com.easylearn.easylearn.word.web.dto.CardResponse;
 import com.easylearn.easylearn.word.web.dto.WordResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,162 +45,56 @@ public class WordController {
     private final WordWebConverter wordWebConverter;
     private final CardWebConverter cardWebConverter;
 
-    @Operation(summary = "Get word by id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = WordResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
     @GetMapping(PATH_BY_ID)
     public WordResponse findById(@NotNull @PathVariable("id") Long id) {
         var category = wordService.findById(id);
         return wordWebConverter.toResponse(category);
     }
 
-    @Operation(summary = "Get all words")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = WordResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
     @GetMapping(WORD_PATH)
     public Collection<WordResponse> findAll(@NotNull @Valid WordFilter wordFilter) {
         var words = wordService.findAll(wordFilter);
         return wordWebConverter.toResponses(words, wordFilter.getUsername());
     }
 
-    @Operation(summary = "Get all cards")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CardResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
     @GetMapping(CARD_PATH)
     public PageResult<CardResponse> findAllCards(@NotNull @Valid CardFilter cardFilter) {
         var cards = wordService.findAllCards(cardFilter);
         return cardWebConverter.toResponse(cards);
     }
 
-    @Operation(summary = "Create word")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
     @PostMapping(WORD_PATH)
     public void create(@Valid @NotNull @RequestBody WordParam wordParam) {
         wordService.create(wordParam);
     }
 
-    @Operation(summary = "Update word by id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema)),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
     @PutMapping(PATH_BY_ID)
     public void update(@NotNull @PathVariable("id") Long id, @Valid @NotNull @RequestBody WordParam wordParam) {
         wordService.update(id, wordParam);
     }
 
-    @Operation(summary = "Delete category by id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
     @DeleteMapping(PATH_BY_ID)
     public void delete(@NotNull @PathVariable("id") Long id) {
         wordService.delete(id);
     }
 
-    @Operation(summary = "Answer word")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
     @GetMapping(PATH_ANSWER)
     public AnswerResponse answer(@NotNull @PathVariable("id") Long id, @NotBlank @PathParam(value = "selectedValue") String selectedValue) {
         var isCorrectAnswer = wordService.answer(id, selectedValue);
         return new AnswerResponse(id, selectedValue, isCorrectAnswer);
     }
 
-    @Operation(summary = "Get all words")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = WordResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
     @GetMapping(PATH_EMPTY_CATEGORY)
     public Collection<WordResponse> findAllWithEmptyCategory() {
         var words = wordService.findAllWithEmptyCategory();
         return wordWebConverter.toBaseResponses(words);
     }
 
-    @Operation(summary = "Delete category by id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
     @DeleteMapping(PATH_REMOVE_FROM_CATEGORY)
     public void deleteFromCategory(@NotNull @PathVariable("id") Long id, @NotNull @PathVariable("categoryId") Long categoryId) {
         wordService.deleteFromCategory(id, categoryId);
     }
 
-    @Operation(summary = "Add to dictionary")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema)),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Not found",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))),
-    })
     @PostMapping(PATH_ADD_TO_DICTIONARY)
     public void addToDictionary(@NotNull @PathVariable("id") Long id) {
         wordService.addToUserWords(id);
