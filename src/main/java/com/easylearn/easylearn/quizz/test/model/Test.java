@@ -30,4 +30,7 @@ public class Test {
 
     @NotNull
     private Collection<Question> questions;
+
+    @NotNull
+    private Boolean isPublicTest;
 }

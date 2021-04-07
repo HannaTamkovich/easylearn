@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -51,7 +52,10 @@ public class TestEntity implements Serializable {
     private Language language;
 
     @NotNull
-    @OneToMany(orphanRemoval = true)
-    @JoinColumn(name = "test_id")
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "test_id", referencedColumnName = "id")
     private Collection<QuestionEntity> questions;
+
+    @NotNull
+    private Boolean isPublicTest;
 }

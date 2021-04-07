@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -37,7 +38,7 @@ public class QuestionEntity implements Serializable {
     private String text;
 
     @NotNull
-    @OneToMany(orphanRemoval = true)
-    @JoinColumn(name = "question_id")
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "question_id", referencedColumnName = "id")
     private Collection<AnswerEntity> answers;
 }

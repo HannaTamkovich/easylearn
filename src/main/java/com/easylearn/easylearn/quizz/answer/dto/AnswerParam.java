@@ -11,5 +11,5 @@ public class AnswerParam {
     private String text;
 
     @NotNull
-    private boolean isCorrectAnswer;
+    private Boolean isCorrectAnswer;
 }

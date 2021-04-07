@@ -14,4 +14,7 @@ public class TestParam {
 
     @NotNull
     private Collection<QuestionParam> questions;
+
+    @NotNull
+    private Boolean isPublicTest;
 }

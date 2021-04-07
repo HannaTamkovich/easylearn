@@ -1,5 +1,6 @@
 package com.easylearn.easylearn.quizz.test.service;
 
+import com.easylearn.easylearn.quizz.answer.dto.AnswerParam;
 import com.easylearn.easylearn.quizz.test.dto.TestParam;
 import com.easylearn.easylearn.quizz.test.repository.TestRepository;
 import com.easylearn.easylearn.quizz.test.repository.converter.TestEntityConverter;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 
 @AllArgsConstructor
@@ -34,6 +36,8 @@ public class TestServiceImpl implements TestService {
     public void create(@NotNull @Valid TestParam testParam) {
         log.info("Create test");
 
+        validateAnswers(testParam);
+
         var test = testParamConverter.toModel(testParam);
 
         var currentUser = userService.loadByUsername(currentUserService.getUsername());
@@ -43,5 +47,17 @@ public class TestServiceImpl implements TestService {
         testRepository.save(testEntityConverter.toEntity(test));
 
         log.debug("Test has been created");
+    }
+
+    private void validateAnswers(TestParam testParam) {
+        var hasTestQuestionWithoutCorrectAnswers = testParam.getQuestions().stream().anyMatch(it -> it.getAnswers().stream().noneMatch(AnswerParam::getIsCorrectAnswer));
+        if (hasTestQuestionWithoutCorrectAnswers) {
+            throw new ValidationException("Вопрос должен содержать хотя бы один первый ответ.");
+        }
+
+        var hasQuestionNotFourAnswers = testParam.getQuestions().stream().anyMatch(it -> it.getAnswers().size() != 4);
+        if (hasQuestionNotFourAnswers) {
+            throw new ValidationException("Вопрос должен содержать 4 варианта ответа.");
+        }
     }
 }

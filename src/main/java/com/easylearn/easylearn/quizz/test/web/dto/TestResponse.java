@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
 @Getter
@@ -17,4 +18,5 @@ public class TestResponse {
     private Long id;
     private String name;
     private Collection<QuestionResponse> questions;
+    private Boolean isPublicTest;
 }

@@ -18,6 +18,7 @@
             <column name="name" type="NVARCHAR(255)"/>
             <column name="language" type="NVARCHAR(255)"/>
             <column name="user_id" type="BIGINT"/>
+            <column name="is_public_test" type="BOOLEAN"/>
         </createTable>
     </changeSet>
 
