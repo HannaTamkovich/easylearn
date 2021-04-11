@@ -2,8 +2,6 @@ package com.easylearn.easylearn.quizz.test.service.converter;
 
 import com.easylearn.easylearn.quizz.test.dto.TestParam;
 import com.easylearn.easylearn.quizz.test.model.Test;
-import com.easylearn.easylearn.word.dto.WordParam;
-import com.easylearn.easylearn.word.model.Word;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
