@@ -18,7 +18,8 @@
             <column name="name" type="NVARCHAR(255)"/>
             <column name="language" type="NVARCHAR(255)"/>
             <column name="user_id" type="BIGINT"/>
-            <column name="is_public_test" type="BOOLEAN"/>
+            <column name="public_test" type="BOOLEAN"/>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </createTable>
     </changeSet>
 

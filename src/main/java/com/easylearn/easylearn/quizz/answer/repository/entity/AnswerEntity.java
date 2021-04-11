@@ -33,5 +33,5 @@ public class AnswerEntity implements Serializable {
     private String text;
 
     @NotNull
-    private boolean isCorrectAnswer;
+    private boolean correctAnswer;
 }

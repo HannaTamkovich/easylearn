@@ -20,4 +20,8 @@ public class TestParamConverter {
     public Test toModel(@NotNull TestParam testParam) {
         return modelMapper.map(testParam, Test.class);
     }
+
+    public void toUpdateModel(@NotNull Test test, @NotNull TestParam testParam) {
+        modelMapper.map(testParam, test);
+    }
 }

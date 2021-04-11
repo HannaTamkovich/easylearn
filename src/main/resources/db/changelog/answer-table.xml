@@ -16,7 +16,7 @@
             </column>
 
             <column name="text" type="NVARCHAR(255)"/>
-            <column name="is_correct_answer" type="BOOLEAN"/>
+            <column name="correct_answer" type="BOOLEAN"/>
             <column name="question_id" type="BIGINT"/>
         </createTable>
     </changeSet>

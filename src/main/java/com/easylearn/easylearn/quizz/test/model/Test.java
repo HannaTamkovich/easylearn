@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.time.Instant;
 import java.util.Collection;
 
 @Data
@@ -32,5 +33,8 @@ public class Test {
     private Collection<Question> questions;
 
     @NotNull
-    private Boolean isPublicTest;
+    private Boolean publicTest;
+
+    @NotNull
+    private Instant createdAt;
 }

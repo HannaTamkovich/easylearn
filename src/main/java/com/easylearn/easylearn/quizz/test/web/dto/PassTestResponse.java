@@ -6,19 +6,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
 import java.util.Collection;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestResponse {
-
+public class PassTestResponse {
     private Long id;
     private String name;
     private Collection<QuestionResponse> questions;
-    private Boolean publicTest;
-    private Long createdAt;
 }

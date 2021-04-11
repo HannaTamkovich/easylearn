@@ -124,11 +124,7 @@ public class WordServiceImpl implements WordService {
             var currentUserLanguage = currentUserService.getLanguage();
             var wordEntities = wordRepository.findByLanguage(currentUserLanguage);
 
-            var words = getIdToWord(wordEntities);
-            var wordIds = wordEntities.stream().map(WordEntity::getId).collect(Collectors.toSet());
-
-            sortedWords = wordToUserRepository.findAllByWordIdInOrderByDateOfLastAnswerAsc(wordIds)
-                    .stream().map(it -> words.get(it.getWordId())).collect(Collectors.toList());
+            sortedWords = wordEntityConverter.toModels(wordEntities);
         }
 
         return convertToCard(sortedWords, cardFilter);

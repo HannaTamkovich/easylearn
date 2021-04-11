@@ -22,6 +22,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Collection;
 
 @Data
@@ -57,5 +58,8 @@ public class TestEntity implements Serializable {
     private Collection<QuestionEntity> questions;
 
     @NotNull
-    private Boolean isPublicTest;
+    private Boolean publicTest;
+
+    @NotNull
+    private Instant createdAt;
 }
