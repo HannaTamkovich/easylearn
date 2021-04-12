@@ -32,7 +32,6 @@ import java.util.Collection;
 @CrossOrigin
 public class TestController {
 
-    //TODO проверить тест
     //TODO оценка теста
     //TODO кол-во прохождений
     //TODO добавить тесты к юзеру
@@ -42,8 +41,6 @@ public class TestController {
     public static final String TEST_PATH = "/tests";
     public static final String BY_ID_PATH = "/tests/{id}";
     public static final String PASS_TEST_PATH = "/tests/{id}/pass";
-
-    //TODO post
     public static final String PASS_TEST_RESULT_PATH = "/tests/{id}/pass/result";
 
     private final TestService testService;
