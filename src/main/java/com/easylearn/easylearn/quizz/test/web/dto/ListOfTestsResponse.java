@@ -18,4 +18,5 @@ public class ListOfTestsResponse {
     private Long createdAt;
     private Float rating;
     private Long numberOfTestPasses;
+    private String author;
 }

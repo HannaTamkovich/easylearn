@@ -49,8 +49,8 @@ public final class WordSpecMaker {
         return (root, query, builder) -> {
             query.distinct(true);
             Root<WordToUserEntity> wordToUserEntityRoot = query.from(WordToUserEntity.class);
-            var wordPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.WORD_ID), root.get(WordEntity_.ID));
-            var userPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.USER_ID), userId);
+            var wordPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.WORD).get(WordEntity_.ID), root.get(WordEntity_.ID));
+            var userPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.USER).get(UserEntity_.ID), userId);
             var categoriesPredicate = wordToUserEntityRoot.get(WordToUserEntity_.CATEGORY).isNull();
             return builder.and(categoriesPredicate, wordPredicates, userPredicates);
         };
@@ -61,7 +61,7 @@ public final class WordSpecMaker {
             query.distinct(true);
             Root<WordToUserEntity> wordToUserEntityRoot = query.from(WordToUserEntity.class);
             var categoriesPredicate = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.CATEGORY).get(CategoryEntity_.ID), category);
-            var wordPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.WORD_ID), root.get(WordEntity_.ID));
+            var wordPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.WORD).get(WordEntity_.ID), root.get(WordEntity_.ID));
             return builder.and(categoriesPredicate, wordPredicates);
         };
     }
@@ -73,9 +73,9 @@ public final class WordSpecMaker {
             Root<UserEntity> userEntityRoot = query.from(UserEntity.class);
             var userPredicate = builder.and(
                     builder.equal(userEntityRoot.get(UserEntity_.USERNAME), username),
-                    builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.USER_ID), userEntityRoot.get(UserEntity_.ID))
+                    builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.USER).get(UserEntity_.ID), userEntityRoot.get(UserEntity_.ID))
             );
-            var wordPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.WORD_ID), root.get(WordEntity_.ID));
+            var wordPredicates = builder.equal(wordToUserEntityRoot.get(WordToUserEntity_.WORD).get(WordEntity_.ID), root.get(WordEntity_.ID));
             return builder.and(userPredicate, wordPredicates);
         };
     }

@@ -68,7 +68,7 @@ public class MockDataCreator {
         );
         wordRepository.saveAll(wordEntityConverter.toEntities(words));
 
-        var wordToUsers = List.of(
+        /*var wordToUsers = List.of(
                 WordToUserEntity.builder()
                         .wordId(1L)
                         .userId(1L)
@@ -84,7 +84,7 @@ public class MockDataCreator {
                         .dateOfLastAnswer(Instant.now())
                         .build()
         );
-        wordToUserRepository.saveAll(wordToUsers);
+        wordToUserRepository.saveAll(wordToUsers);*/
     }
 
     private void createUsers() {

@@ -12,6 +12,7 @@ import com.easylearn.easylearn.word.web.dto.CardResponse;
 import com.easylearn.easylearn.word.web.dto.WordResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,7 +49,7 @@ public class WordController {
     @GetMapping(PATH_BY_ID)
     public WordResponse findById(@NotNull @PathVariable("id") Long id) {
         var category = wordService.findById(id);
-        return wordWebConverter.toResponse(category);
+        return wordWebConverter.toResponse(category, StringUtils.EMPTY);
     }
 
     @GetMapping(WORD_PATH)

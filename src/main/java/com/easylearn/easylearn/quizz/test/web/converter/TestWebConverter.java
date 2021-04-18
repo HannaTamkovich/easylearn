@@ -37,6 +37,7 @@ public class TestWebConverter {
         var rating = testRateRepository.averageRateByTestId(test.getId());
         response.setRating(Objects.nonNull(rating) ? rating : 0);
         response.setNumberOfTestPasses(testToUserRepository.countByTest_Id(test.getId()));
+        response.setAuthor(test.getUser().getUsername());
         return response;
     }
 

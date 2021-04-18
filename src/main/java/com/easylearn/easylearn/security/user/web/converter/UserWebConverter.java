@@ -36,7 +36,7 @@ public class UserWebConverter {
 
     private UserPageResponse toPageResponse(User user) {
         var userResponse = modelMapper.map(user, UserPageResponse.class);
-        userResponse.setNumberOfWords(wordToUserRepository.countByUserId(user.getId()));
+        userResponse.setNumberOfWords(wordToUserRepository.countByUser_Id(user.getId()));
         userResponse.setNumberOfTests(testRepository.countByUser_Id(user.getId()));
         return userResponse;
     }

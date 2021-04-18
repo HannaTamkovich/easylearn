@@ -11,23 +11,21 @@ public interface WordToUserRepository extends JpaRepository<WordToUserEntity, Lo
 
     boolean existsByCategory_Id(Long categoryId);
 
-    boolean existsByUserIdAndWordId(Long userId, Long wordId);
+    boolean existsByUser_UsernameAndWord_Id(String username, Long wordId);
 
-    void deleteByUserIdAndWordId(Long userId, Long wordId);
+    void deleteByUser_UsernameAndWord_Id(String username, Long wordId);
 
-    long countByWordId(Long wordId);
+    Long countByWord_Id(Long wordId);
 
-    void deleteByWordId(Long wordId);
+    void deleteByWord_Id(Long wordId);
 
-    Optional<WordToUserEntity> findEntityByWordIdAndUserId(Long wordId, Long userId);
+    Optional<WordToUserEntity> findEntityByWord_IdAndUser_Username(Long wordId, String username);
 
-    Optional<WordToUserEntity> findEntityByWordIdAndUserIdAndCategory_Id(Long wordId, Long userId, Long categoryId);
+    Optional<WordToUserEntity> findEntityByWord_IdAndUser_UsernameAndCategory_Id(Long wordId, String username, Long categoryId);
 
-    WordToUserEntity findByWordIdAndUserId(Long wordId, Long userId);
+    WordToUserEntity findByWord_IdAndUser_Username(Long wordId, String username);
 
-    List<WordToUserEntity> findAllByUserIdOrderByDateOfLastAnswerAsc(Long userId);
+    List<WordToUserEntity> findAllByUser_UsernameOrderByDateOfLastAnswerAsc(String username);
 
-    Long countByUserId(Long userId);
-
-    List<WordToUserEntity> findAllByWordIdInOrderByDateOfLastAnswerAsc(Collection<Long> wordIds);
+    Long countByUser_Id(Long userId);
 }

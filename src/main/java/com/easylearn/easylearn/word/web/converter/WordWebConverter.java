@@ -3,8 +3,10 @@ package com.easylearn.easylearn.word.web.converter;
 import com.easylearn.easylearn.category.service.CategoryService;
 import com.easylearn.easylearn.category.web.dto.DefaultCategoryResponse;
 import com.easylearn.easylearn.word.model.Word;
+import com.easylearn.easylearn.word.repository.WordToUserRepository;
 import com.easylearn.easylearn.word.web.dto.WordResponse;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
@@ -18,19 +20,25 @@ public class WordWebConverter {
 
     private final ModelMapper modelMapper;
 
+    private final WordToUserRepository wordToUserRepository;
     private final CategoryService categoryService;
 
     @NotNull
     public Collection<WordResponse> toResponses(@NotNull Collection<Word> words, @NotNull String username) {
-        return words.stream().map(this::toResponse)
-                .peek(it -> it.setCategory(getUserCategoryResponse(it.getId(), username)))
-                .collect(Collectors.toList());
+        return words.stream().map(it -> toResponse(it, username)).collect(Collectors.toList());
     }
 
     @NotNull
-    public WordResponse toResponse(@NotNull Word word) {
+    public WordResponse toResponse(@NotNull Word word, @NotNull String username) {
         var wordResponse = modelMapper.map(word, WordResponse.class);
-        wordResponse.setCategory(getCategoryResponse(word.getId()));
+        var isUsernameNotBlank = StringUtils.isNotBlank(username);
+        var category = isUsernameNotBlank ? getUserCategoryResponse(word.getId(), username) : getCategoryResponse(word.getId());
+        if (isUsernameNotBlank) {
+            var wordToUserEntity = wordToUserRepository.findByWord_IdAndUser_Username(word.getId(), username);
+            wordResponse.setNumberOfAnswers(wordToUserEntity.getNumberOfAnswers());
+            wordResponse.setNumberOfCorrectAnswers(wordToUserEntity.getNumberOfCorrectAnswers());
+        }
+        wordResponse.setCategory(category);
         return wordResponse;
     }
 

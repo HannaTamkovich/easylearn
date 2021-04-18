@@ -1,18 +1,21 @@
 package com.easylearn.easylearn.word.repository.entity;
 
 import com.easylearn.easylearn.category.repository.entity.CategoryEntity;
+import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -37,10 +40,14 @@ public class WordToUserEntity implements Serializable {
     private Long id;
 
     @NotNull
-    private Long userId;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 
     @NotNull
-    private Long wordId;
+    @OneToOne
+    @JoinColumn(name = "word_id")
+    private WordEntity word;
 
     @ManyToOne
     @Nullable
@@ -48,11 +55,14 @@ public class WordToUserEntity implements Serializable {
     private CategoryEntity category;
 
     @NotNull
+    @Column(name = "number_of_answers")
     private Long numberOfAnswers = 0L;
 
     @NotNull
+    @Column(name = "number_of_correct_answers")
     private Long numberOfCorrectAnswers = 0L;
 
     @NotNull
+    @Column(name = "date_of_last_answer")
     private Instant dateOfLastAnswer;
 }

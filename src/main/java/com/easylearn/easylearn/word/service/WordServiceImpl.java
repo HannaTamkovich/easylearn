@@ -9,7 +9,6 @@ import com.easylearn.easylearn.core.exception.ServiceException;
 import com.easylearn.easylearn.handbook.russianword.repository.RussianWordRepository;
 import com.easylearn.easylearn.handbook.russianword.repository.entity.RussianWordEntity;
 import com.easylearn.easylearn.security.service.CurrentUserService;
-import com.easylearn.easylearn.security.user.model.User;
 import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import com.easylearn.easylearn.security.user.service.UserService;
 import com.easylearn.easylearn.word.dto.CardFilter;
@@ -111,14 +110,14 @@ public class WordServiceImpl implements WordService {
         List<Word> sortedWords;
 
         if (cardFilter.isOnlyUserWords()) {
-            var userId = userService.loadByUsername(currentUserService.getUsername()).getId();
-            var spec = CardSpecMaker.makeSpec(userId);
+            var username = currentUserService.getUsername();
+            var spec = CardSpecMaker.makeSpec(username);
             var wordEntities = wordRepository.findAll(spec);
 
             var words = getIdToWord(wordEntities);
 
-            sortedWords = wordToUserRepository.findAllByUserIdOrderByDateOfLastAnswerAsc(userId)
-                    .stream().map(it -> words.get(it.getWordId())).collect(Collectors.toList());
+            sortedWords = wordToUserRepository.findAllByUser_UsernameOrderByDateOfLastAnswerAsc(username)
+                    .stream().map(it -> words.get(it.getWord().getId())).collect(Collectors.toList());
 
         } else {
             var currentUserLanguage = currentUserService.getLanguage();
@@ -159,14 +158,14 @@ public class WordServiceImpl implements WordService {
         log.info("Update word ({})", id);
 
         var word = findById(id);
-        var currentUser = userService.loadByUsername(currentUserService.getUsername());
 
-        var countByWordId = wordToUserRepository.countByWordId(id);
+        var countByWordId = wordToUserRepository.countByWord_Id(id);
         if (countByWordId == 1) {
             var updatedWord = updateFields(word, wordParam);
             wordRepository.save(wordEntityConverter.toEntity(updatedWord));
 
         } else if (countByWordId > 1) {
+            var currentUser = currentUserService.getUsername();
             deleteFromUserList(id, currentUser);
             create(wordParam);
 
@@ -182,10 +181,10 @@ public class WordServiceImpl implements WordService {
     public void delete(@NotNull Long id) {
         log.info("Delete word ({})", id);
 
-        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+        var currentUser = currentUserService.getUsername();
         validateWordForDeleting(id, currentUser);
 
-        var countByWordId = wordToUserRepository.countByWordId(id);
+        var countByWordId = wordToUserRepository.countByWord_Id(id);
         if (countByWordId == 1) {
             deletePermanently(id);
 
@@ -235,9 +234,9 @@ public class WordServiceImpl implements WordService {
         var categoryEntity = getCategoryEntity(categoryId);
         validateWordLanguageToAddToCategory(id, categoryEntity);
 
-        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+        var currentUser = currentUserService.getUsername();
 
-        var wordToUserEntity = wordToUserRepository.findEntityByWordIdAndUserId(id, currentUser.getId()).orElseThrow();
+        var wordToUserEntity = wordToUserRepository.findEntityByWord_IdAndUser_Username(id, currentUser).orElseThrow();
         wordToUserEntity.setCategory(categoryEntity);
 
         wordToUserRepository.save(wordToUserEntity);
@@ -246,9 +245,9 @@ public class WordServiceImpl implements WordService {
     @Override
     @Transactional
     public void deleteFromCategory(@NotNull Long id, @NotNull Long categoryId) {
-        var currentUser = userService.loadByUsername(currentUserService.getUsername());
-        var wordToUserEntity = wordToUserRepository.
-                findEntityByWordIdAndUserIdAndCategory_Id(id, currentUser.getId(), categoryId).orElseThrow();
+        var currentUser = currentUserService.getUsername();
+        var wordToUserEntity = wordToUserRepository.findEntityByWord_IdAndUser_UsernameAndCategory_Id(id,
+                currentUser, categoryId).orElseThrow();
 
         removeFromCategory(wordToUserEntity);
     }
@@ -256,12 +255,12 @@ public class WordServiceImpl implements WordService {
     @Override
     @Transactional
     public void addToUserWords(@NotNull Long id) {
-        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+        var currentUser = currentUserService.getUsername();
         validatingForDuplication(id, currentUser);
 
         var wordToUserEntity = WordToUserEntity.builder()
-                .wordId(id)
-                .userId(currentUser.getId())
+                .word(wordRepository.getOne(id))
+                .user(userService.loadUserEntity(currentUser))
                 .numberOfAnswers(0L)
                 .numberOfCorrectAnswers(0L)
                 .dateOfLastAnswer(Instant.now())
@@ -301,9 +300,9 @@ public class WordServiceImpl implements WordService {
     }
 
     public void updateCategory(Word word, WordParam wordParam) {
-        var currentUser = userService.loadByUsername(currentUserService.getUsername());
+        var currentUser = currentUserService.getUsername();
 
-        var wordToUserEntity = wordToUserRepository.findByWordIdAndUserId(word.getId(), currentUser.getId());
+        var wordToUserEntity = wordToUserRepository.findByWord_IdAndUser_Username(word.getId(), currentUser);
 
         if (Objects.nonNull(wordToUserEntity.getCategory()) && Objects.isNull(wordParam.getCategoryId())) {
             removeFromCategory(wordToUserEntity);
@@ -323,12 +322,12 @@ public class WordServiceImpl implements WordService {
         wordToUserRepository.save(wordToUserEntity);
     }
 
-    private void deleteFromUserList(Long wordId, User currentUser) {
-        wordToUserRepository.deleteByUserIdAndWordId(currentUser.getId(), wordId);
+    private void deleteFromUserList(Long wordId, String currentUser) {
+        wordToUserRepository.deleteByUser_UsernameAndWord_Id(currentUser, wordId);
     }
 
     private void deletePermanently(Long wordId) {
-        wordToUserRepository.deleteByWordId(wordId);
+        wordToUserRepository.deleteByWord_Id(wordId);
         wordRepository.deleteById(wordId);
     }
 
@@ -344,14 +343,14 @@ public class WordServiceImpl implements WordService {
                 .orElseThrow(() -> new EntityNotFoundException(CategoryEntity.class.getSimpleName(), categoryId));
     }
 
-    private void validatingForDuplication(Long wordId, User currentUser) {
-        if (wordToUserRepository.existsByUserIdAndWordId(currentUser.getId(), wordId)) {
+    private void validatingForDuplication(Long wordId, String currentUser) {
+        if (wordToUserRepository.existsByUser_UsernameAndWord_Id(currentUser, wordId)) {
             throw new DuplicateException("Слово было добавлено ранее.");
         }
     }
 
-    private void validateWordForDeleting(Long wordId, User currentUser) {
-        if (!wordToUserRepository.existsByUserIdAndWordId(currentUser.getId(), wordId)) {
+    private void validateWordForDeleting(Long wordId, String currentUser) {
+        if (!wordToUserRepository.existsByUser_UsernameAndWord_Id(currentUser, wordId)) {
             throw new ServiceException("Слово не было найдено в Вашем списке слов.");
         }
     }
@@ -369,7 +368,7 @@ public class WordServiceImpl implements WordService {
     }
 
     private void updateWordStatistic(Long id, UserEntity currentUserEntity, boolean isCorrectTranslation) {
-        wordToUserRepository.findEntityByWordIdAndUserId(id, currentUserEntity.getId())
+        wordToUserRepository.findEntityByWord_IdAndUser_Username(id, currentUserEntity.getUsername())
                 .ifPresent(it -> {
                     if (isCorrectTranslation) {
                         it.setNumberOfCorrectAnswers(it.getNumberOfCorrectAnswers() + 1);

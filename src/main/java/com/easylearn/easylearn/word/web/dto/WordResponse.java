@@ -13,4 +13,6 @@ import lombok.Setter;
 public class WordResponse extends DefaultWordResponse {
 
     private DefaultCategoryResponse category;
+    private Long numberOfAnswers;
+    private Long numberOfCorrectAnswers;
 }

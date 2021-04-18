@@ -128,7 +128,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     private Optional<Category> findCategoryForUser(Long wordId, User user) {
-        return wordToUserRepository.findEntityByWordIdAndUserId(wordId, user.getId())
+        return wordToUserRepository.findEntityByWord_IdAndUser_Username(wordId, user.getUsername())
                 .flatMap(wordToUserEntity -> Optional.ofNullable(wordToUserEntity.getCategory())
                         .map(categoryEntityConverter::toModel));
     }

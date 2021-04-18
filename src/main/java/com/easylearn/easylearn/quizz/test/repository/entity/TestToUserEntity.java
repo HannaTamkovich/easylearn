@@ -37,7 +37,7 @@ public class TestToUserEntity implements Serializable {
     private Long id;
 
     @NotNull
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
