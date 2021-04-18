@@ -9,9 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AnswerResponse {
+public class PassAnswerResponse {
 
     private Long id;
     private String text;
-    private boolean correctAnswer;
 }

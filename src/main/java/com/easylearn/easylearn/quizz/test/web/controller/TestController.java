@@ -1,6 +1,7 @@
 package com.easylearn.easylearn.quizz.test.web.controller;
 
 import com.easylearn.easylearn.quizz.test.dto.AnswerTestParam;
+import com.easylearn.easylearn.quizz.test.dto.RatingParam;
 import com.easylearn.easylearn.quizz.test.dto.SearchParam;
 import com.easylearn.easylearn.quizz.test.dto.TestParam;
 import com.easylearn.easylearn.quizz.test.service.TestService;
@@ -32,16 +33,11 @@ import java.util.Collection;
 @CrossOrigin
 public class TestController {
 
-    //TODO оценка теста
-    //TODO кол-во прохождений
-    //TODO добавить тесты к юзеру
-    //TODO запретить проходить пользователю одни и те же тесты
-    //TODO при нажать пройти тест показывать сразу результат теста, если он был пройден ранее
-
     public static final String TEST_PATH = "/tests";
     public static final String BY_ID_PATH = "/tests/{id}";
     public static final String PASS_TEST_PATH = "/tests/{id}/pass";
     public static final String PASS_TEST_RESULT_PATH = "/tests/{id}/pass/result";
+    public static final String RATING_PATH = "/tests/{id}/rating";
 
     private final TestService testService;
     private final TestWebConverter testWebConverter;
@@ -83,5 +79,10 @@ public class TestController {
     public TestResultResponse checkTest(@NotNull @PathVariable Long id, @Valid @NotNull @RequestBody AnswerTestParam testParam) {
         var checked = testService.checkTest(id, testParam);
         return testWebConverter.toResultResponse(checked);
+    }
+
+    @PostMapping(RATING_PATH)
+    public void ratingTest(@NotNull @PathVariable Long id, @Valid @NotNull @RequestBody RatingParam rating) {
+        testService.ratingTest(id, rating.getRating());
     }
 }

@@ -26,4 +26,6 @@ public interface TestService {
 
     @NotNull
     TestResult checkTest(@NotNull Long id, @NotNull @Valid AnswerTestParam testParam);
+
+    void ratingTest(@NotNull Long id, @Valid @NotNull Integer rating);
 }

@@ -16,4 +16,6 @@ public class ListOfTestsResponse {
     private Integer numberOfQuestions;
     private boolean publicTest;
     private Long createdAt;
+    private Float rating;
+    private Long numberOfTestPasses;
 }

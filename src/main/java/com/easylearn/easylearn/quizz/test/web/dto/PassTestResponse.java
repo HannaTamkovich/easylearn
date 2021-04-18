@@ -1,6 +1,6 @@
 package com.easylearn.easylearn.quizz.test.web.dto;
 
-import com.easylearn.easylearn.quizz.question.web.dto.QuestionResponse;
+import com.easylearn.easylearn.quizz.question.web.dto.PassQuestionResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,5 +15,8 @@ import java.util.Collection;
 public class PassTestResponse {
     private Long id;
     private String name;
-    private Collection<QuestionResponse> questions;
+    private Collection<PassQuestionResponse> questions;
+    private boolean canUserPassTest = true;
+    private Long numberOfCorrectAnswers;
+    private Integer rate;
 }

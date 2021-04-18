@@ -12,9 +12,14 @@ import com.easylearn.easylearn.quizz.test.dto.TestParam;
 import com.easylearn.easylearn.quizz.test.model.Test;
 import com.easylearn.easylearn.quizz.test.model.TestResult;
 import com.easylearn.easylearn.quizz.test.repository.TestRepository;
+import com.easylearn.easylearn.quizz.test.repository.TestToUserRepository;
 import com.easylearn.easylearn.quizz.test.repository.converter.TestEntityConverter;
+import com.easylearn.easylearn.quizz.test.repository.entity.TestToUserEntity;
 import com.easylearn.easylearn.quizz.test.service.converter.TestParamConverter;
+import com.easylearn.easylearn.quizz.test.testrating.repository.TestRateRepository;
+import com.easylearn.easylearn.quizz.test.testrating.repository.entity.TestRateEntity;
 import com.easylearn.easylearn.security.service.CurrentUserService;
+import com.easylearn.easylearn.security.user.repository.entity.UserEntity;
 import com.easylearn.easylearn.security.user.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +35,7 @@ import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -40,6 +46,8 @@ public class TestServiceImpl implements TestService {
 
     private final TestRepository testRepository;
     private final QuestionRepository questionRepository;
+    private final TestRateRepository testRateRepository;
+    private final TestToUserRepository testToUserRepository;
 
     private final CurrentUserService currentUserService;
     private final UserService userService;
@@ -123,9 +131,13 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @NotNull
+    @Transactional
     public TestResult checkTest(@NotNull Long id, @NotNull @Valid AnswerTestParam testParam) {
         log.info("Validate answers for test {}", id);
+
+        var username = currentUserService.getUsername();
+        validateToCanUserAnswerTest(id, username);
 
         var result = testParam.getQuestions().stream()
                 .map(it -> {
@@ -138,12 +150,54 @@ public class TestServiceImpl implements TestService {
                     return new QuestionResult(questionId, correct);
                 }).collect(Collectors.toSet());
 
+        createTestToUser(id, username, result);
+
         return new TestResult(id, result);
+    }
+
+    @Override
+    @Transactional
+    public void ratingTest(@NotNull Long id, @Valid @NotNull Integer rating) {
+        log.info("Rate test {}", id);
+
+        var currentUserEntity = userService.loadUserEntity(currentUserService.getUsername());
+
+        validateToRate(currentUserEntity, id);
+        testRateRepository.existsByUser_IdAndTest_Id(currentUserEntity.getId(), id);
+
+        var rate = TestRateEntity.builder()
+                .user(currentUserEntity)
+                .test(testRepository.getOne(id))
+                .rate(rating)
+                .build();
+
+        testRateRepository.save(rate);
+    }
+
+    private void validateToCanUserAnswerTest(Long id, String username) {
+        if (testToUserRepository.existsByUser_UsernameAndTest_Id(username, id)) {
+            throw new ValidationException("Тест был пройден ранее.");
+        }
+    }
+
+    private void validateToRate(UserEntity currentUserEntity, Long id) {
+        if (testRateRepository.existsByUser_IdAndTest_Id(currentUserEntity.getId(), id)) {
+            throw new ValidationException("Тест был оценен ранее.");
+        }
     }
 
     private QuestionEntity getQuestionEntity(Long questionId) {
         return questionRepository.findById(questionId)
                 .orElseThrow(() -> new EntityNotFoundException(QuestionEntity.class.getSimpleName(), questionId));
+    }
+
+    private void createTestToUser(Long id, String username, Set<QuestionResult> result) {
+        var testToUserEntity = TestToUserEntity.builder()
+                .test(testRepository.getOne(id))
+                .user(userService.loadUserEntity(username))
+                .numberOfCorrectAnswer(result.stream().filter(QuestionResult::isCorrect).count())
+                .build();
+        testToUserRepository.save(testToUserEntity);
     }
 
     private void validateAnswers(TestParam testParam) {
