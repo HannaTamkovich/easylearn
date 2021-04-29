@@ -13,4 +13,6 @@ public interface TestRepository extends JpaRepository<TestEntity, Long> {
     Collection<TestEntity> findByLanguageAndNameContainsAndUser_UsernameNotAndPublicTestTrueOrderByName(Language language, String username, String name);
 
     long countByUser_Id(Long userID);
+
+    Collection<TestEntity> findByUser_UsernameAndPublicTestTrueOrderByName(String username);
 }

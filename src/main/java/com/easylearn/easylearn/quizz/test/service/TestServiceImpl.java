@@ -174,6 +174,24 @@ public class TestServiceImpl implements TestService {
         testRateRepository.save(rate);
     }
 
+    @Override
+    @NotNull
+    @Transactional(readOnly = true)
+    public Collection<Test> findByUsername(String username) {
+        log.info("Find tests by username {}", username);
+
+        var testEntities = testRepository.findByUser_UsernameAndPublicTestTrueOrderByName(username);
+
+        return testEntityConverter.toModels(testEntities);
+    }
+
+    @Override
+    @NotNull
+    @Transactional(readOnly = true)
+    public Collection<Test> findPassedTestOfCurrentUser() {
+        return null;
+    }
+
     private void validateToCanUserAnswerTest(Long id, String username) {
         if (testToUserRepository.existsByUser_UsernameAndTest_Id(username, id)) {
             throw new ValidationException("Тест был пройден ранее.");

@@ -28,4 +28,10 @@ public interface TestService {
     TestResult checkTest(@NotNull Long id, @NotNull @Valid AnswerTestParam testParam);
 
     void ratingTest(@NotNull Long id, @Valid @NotNull Integer rating);
+
+    @NotNull
+    Collection<Test> findByUsername(@NotNull String username);
+
+    @NotNull
+    Collection<Test> findPassedTestOfCurrentUser();
 }

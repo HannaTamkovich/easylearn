@@ -8,6 +8,7 @@ import com.easylearn.easylearn.quizz.test.service.TestService;
 import com.easylearn.easylearn.quizz.test.web.converter.TestWebConverter;
 import com.easylearn.easylearn.quizz.test.web.dto.ListOfTestsResponse;
 import com.easylearn.easylearn.quizz.test.web.dto.PassTestResponse;
+import com.easylearn.easylearn.quizz.test.web.dto.PassedTestResponse;
 import com.easylearn.easylearn.quizz.test.web.dto.TestResponse;
 import com.easylearn.easylearn.quizz.test.web.dto.TestResultResponse;
 import com.sun.istack.Nullable;
@@ -38,6 +39,8 @@ public class TestController {
     public static final String PASS_TEST_PATH = "/tests/{id}/pass";
     public static final String PASS_TEST_RESULT_PATH = "/tests/{id}/pass/result";
     public static final String RATING_PATH = "/tests/{id}/rating";
+    public static final String USER_TESTS_PATH = "/user-tests/{username}";
+    public static final String PASSED_TESTS_PATH = "/passed-tests";
 
     private final TestService testService;
     private final TestWebConverter testWebConverter;
@@ -84,5 +87,17 @@ public class TestController {
     @PostMapping(RATING_PATH)
     public void ratingTest(@NotNull @PathVariable Long id, @Valid @NotNull @RequestBody RatingParam rating) {
         testService.ratingTest(id, rating.getRating());
+    }
+
+    @GetMapping(USER_TESTS_PATH)
+    public Collection<ListOfTestsResponse> findByUsername(@NotNull @PathVariable String username) {
+        var tests = testService.findByUsername(username);
+        return testWebConverter.toListResponses(tests);
+    }
+
+    @GetMapping(PASSED_TESTS_PATH)
+    public Collection<PassedTestResponse> findByUsername() {
+        var tests = testService.findPassedTestOfCurrentUser();
+        return testWebConverter.toPassedResponses(tests);
     }
 }

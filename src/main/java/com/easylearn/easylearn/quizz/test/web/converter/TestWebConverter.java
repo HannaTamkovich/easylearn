@@ -7,6 +7,7 @@ import com.easylearn.easylearn.quizz.test.repository.TestToUserRepository;
 import com.easylearn.easylearn.quizz.test.testrating.repository.TestRateRepository;
 import com.easylearn.easylearn.quizz.test.web.dto.ListOfTestsResponse;
 import com.easylearn.easylearn.quizz.test.web.dto.PassTestResponse;
+import com.easylearn.easylearn.quizz.test.web.dto.PassedTestResponse;
 import com.easylearn.easylearn.quizz.test.web.dto.TestResponse;
 import com.easylearn.easylearn.quizz.test.web.dto.TestResultResponse;
 import com.easylearn.easylearn.security.service.CurrentUserService;
@@ -33,11 +34,26 @@ public class TestWebConverter {
 
     public ListOfTestsResponse toListResponse(Test test) {
         var response = modelMapper.map(test, ListOfTestsResponse.class);
-        response.setNumberOfQuestions(test.getQuestions().size());
+        response.setNumberOfQuestions((long) test.getQuestions().size());
         var rating = testRateRepository.averageRateByTestId(test.getId());
         response.setRating(Objects.nonNull(rating) ? rating : 0);
         response.setNumberOfTestPasses(testToUserRepository.countByTest_Id(test.getId()));
         response.setAuthor(test.getUser().getUsername());
+        return response;
+    }
+
+    public Collection<PassedTestResponse> toPassedResponses(Collection<Test> tests) {
+        return tests.stream().map(this::toPassedResponse).collect(Collectors.toList());
+    }
+
+    public PassedTestResponse toPassedResponse(Test test) {
+        var response = modelMapper.map(test, PassedTestResponse.class);
+        response.setNumberOfQuestions((long) test.getQuestions().size());
+
+        var username = currentUserService.getUsername();
+        testToUserRepository.findByUser_UsernameAndTest_Id(username, test.getId())
+                .ifPresent(it -> response.setNumberOfCorrectAnswers(it.getNumberOfCorrectAnswer()));
+
         return response;
     }
 
